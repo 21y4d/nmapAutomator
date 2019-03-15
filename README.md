@@ -14,13 +14,13 @@ Once you find the inital ports in around 10 seconds, you then can start manulall
   
   
 # Features:
-1. **1-Quick:**	Shows all open ports quickly (~15 seconds)  
-1. **2-Basic:**	Runs Quick Scan, then a runs more thorough scan on found ports (~5 minutes)  
-1. **3-UDP:**	  Runs "Basic" on UDP ports (~5 minutes)  
-1. **4-Full:** 	Runs a full range port scan, then runs a thorough scan on new ports (~5-10 minutes)  
-1. **5-Vulns:**	Runs CVE scan and nmap Vulns scan on all found ports (~5-15 minutes)  
-1. **6-Recon:**	Runs "Basic" scan "if not yet run", then suggests recon commands "i.e. gobuster, nikto, smbmap" based on the found ports, then prompts to automatically run them  
-1. **7-All:**  	Runs all the scans consecutively (~20-30 minutes)  
+1. **Quick:**	Shows all open ports quickly (~15 seconds)  
+1. **Basic:**	Runs Quick Scan, then a runs more thorough scan on found ports (~5 minutes)  
+1. **UDP:**	  Runs "Basic" on UDP ports (~5 minutes)  
+1. **Full:** 	Runs a full range port scan, then runs a thorough scan on new ports (~5-10 minutes)  
+1. **Vulns:**	Runs CVE scan and nmap Vulns scan on all found ports (~5-15 minutes)  
+1. **Recon:**	Runs "Basic" scan "if not yet run", then suggests recon commands "i.e. gobuster, nikto, smbmap" based on the found ports, then prompts to automatically run them  
+1. **All:**  	Runs all the scans consecutively (~20-30 minutes)  
   
 I tried to make the script as efficient as possible, so that you would get the results as fast as possible, without duplicating any work.  
   
