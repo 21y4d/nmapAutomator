@@ -3,7 +3,7 @@ A script that you can run in the background!
 
 
 # Summary
-I have created this script as I was preparing for my OSCP exam.
+I have created this script as I was preparing for my OSCP exam.\n
 The main goal for this script is to automate all of the process of recon/enumeration that is run every time, and instead focus our attention on real pen testing.
 
 This will ensure two things:
