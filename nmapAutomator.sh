@@ -189,7 +189,7 @@ fullScan(){
 echo -e "${GREEN}---------------------Starting Nmap Full Scan----------------------"
 echo -e "${NC}"
 
-$nmapType -p- --max-retries 1 --max-rate 1000 --max-scan-delay 20 -T4 -v -oN nmap/Full_$1.nmap $1
+$nmapType -p- --max-retries 1 --max-rate 500 --max-scan-delay 20 -T4 -v -oN nmap/Full_$1.nmap $1
 assignPorts $1
 
 if [ -z `echo "${basicPorts}"` ]; then
