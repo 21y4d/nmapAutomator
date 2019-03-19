@@ -374,6 +374,7 @@ if [[ ! -z `echo "${file}" | grep -w "445/tcp"` ]]; then
 	echo -e "${YELLOW}SMB Recon:"
 	echo -e "${NC}"
 	echo "smbmap -H $1 | tee recon/smbmap_$1.txt"
+	echo "smbclient -L \"//$1/\" -U \"guest\"% | tee recon/smbclient_$1.txt"
 	if [[ $osType == "Windows" ]]; then
 		echo "nmap -Pn -p445 --script vuln -oN recon/SMB_vulns_$1.txt $1"
 	fi
