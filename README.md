@@ -10,7 +10,7 @@ This will ensure two things:
 	1) Automate nmap scans. 
 	2) Always have some recon running in the background. 
 
-Once you find the inital ports in around 10 seconds, you then can start manulally looking into those ports, and let the rest run in the background with no interaction from your side whatsoever.  
+Once you find the inital ports in around 10 seconds, you then can start manually looking into those ports, and let the rest run in the background with no interaction from your side whatsoever.  
   
   
 # Features:
