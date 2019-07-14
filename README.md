@@ -26,8 +26,8 @@ I tried to make the script as efficient as possible, so that you would get the r
   
   
 # Requirements:
-Required: Gobuster v 3.0 or higher, as it is not backward compatible.
-Recommended: nmap vulners scrip "for CVE scan"  
+**Required:** Gobuster v 3.0 or higher, as it is not backward compatible.
+**Recommended:** nmap vulners scrip "for CVE scan"  
 https://github.com/vulnersCom/nmap-vulners  
   
   
@@ -37,5 +37,5 @@ https://github.com/vulnersCom/nmap-vulners
 ./nmapAutomator.sh 10.1.1.1 Basic  
 ./nmapAutomator.sh 10.1.1.1 Recon  
 
-If you want to use it anywhere on the system, create a shortcut using:
+**If you want to use it anywhere on the system, create a shortcut using:**
 ln -s /PATH-TO-FOLDER/nmapAutomator.sh /usr/local/bin/
