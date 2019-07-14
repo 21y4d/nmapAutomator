@@ -333,17 +333,17 @@ for line in $file; do
 	if [[ ! -z `echo "${line}" | grep -i http` ]]; then
 		port=`echo "${line}" | cut -d "/" -f 1`
 		if [[ ! -z `echo "${line}" | grep -w "IIS"` ]]; then
-			pages="html,asp,php"
+			pages=".html,.asp,.php"
 		else
-			pages="html,php"
+			pages=".html,.php"
 		fi
 		if [[ ! -z `echo "${line}" | grep ssl/http` ]]; then
 			#echo "sslyze --regular $1 | tee recon/sslyze_$1_$port.txt"
 			echo "sslscan $1 | tee recon/sslscan_$1_$port.txt"
-			echo "gobuster -w /usr/share/wordlists/dirb/common.txt -t 30 -k -x $pages -s 200,204,301,302,307,401,403,500 -u https://$1:$port -o recon/gobuster_$1_$port.txt"
+			echo "gobuster dir -w /usr/share/wordlists/dirb/common.txt -l -t 30 -e -k -x $pages -u https://$1:$port -o recon/gobuster_$1_$port.txt"
 			echo "nikto -host https://$1:$port -ssl | tee recon/nikto_$1_$port.txt"
 		else
-			echo "gobuster -w /usr/share/wordlists/dirb/common.txt -t 30 -x $pages -s 200,204,301,302,307,401,403,500 -u http://$1:$port -o recon/gobuster_$1_$port.txt"
+			echo "gobuster dir -w /usr/share/wordlists/dirb/common.txt -l -t 30 -e -k -x $pages -u http://$1:$port -o recon/gobuster_$1_$port.txt"
 			echo "nikto -host $1:$port | tee recon/nikto_$1_$port.txt"
 		fi
 		echo ""
