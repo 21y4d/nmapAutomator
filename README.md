@@ -28,7 +28,8 @@ I tried to make the script as efficient as possible, so that you would get the r
 # Requirements:
 **Required:** Gobuster v 3.0 or higher, as it is not backward compatible.  
 You can upadate gobuster on kali using:  
-```apt-get update  
+```
+apt-get update
 apt-get install gobuster --only-upgrade  
 ```
 **Recommended:** nmap vulners scrip "for CVE scan"  
