@@ -10,7 +10,7 @@ SECONDS=0
 
 usage(){
 echo -e ""
-echo -e "${RED}Usage: ./nmapAutomator.sh <TARGET-IP> <TYPE>"
+echo -e "${RED}Usage: $0 <TARGET-IP> <TYPE>"
 echo -e "${YELLOW}"
 echo -e "Scan Types:"
 echo -e "\tQuick:	Shows all open ports quickly (~15 seconds)"
