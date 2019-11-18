@@ -10,7 +10,7 @@ SECONDS=0
 
 usage(){
 echo -e ""
-echo -e "${RED}Usage: $0 <TARGET-IP> <TYPE>"
+echo -e "${RED}Usage: ./nmapAutomator.sh <TARGET-IP> <TYPE>"
 echo -e "${YELLOW}"
 echo -e "Scan Types:"
 echo -e "\tQuick:	Shows all open ports quickly (~15 seconds)"
@@ -127,7 +127,8 @@ quickScan(){
 echo -e "${GREEN}---------------------Starting Nmap Quick Scan---------------------"
 echo -e "${NC}"
 
-$nmapType -T4 --max-retries 1 --max-scan-delay 20 --defeat-rst-ratelimit --open -oN nmap/Quick_$1.nmap $1
+#$nmapType -T4 --max-retries 1 --max-scan-delay 20 --defeat-rst-ratelimit --open -oN nmap/Quick_$1.nmap $1
+$nmapType -T4 --max-retries 1 --max-scan-delay 20 --defeat-rst-ratelimit --open -oN nmap/Quick_$1.nmap -oX nmap/Quick_$1.xml $1
 assignPorts $1
 
 echo -e ""
@@ -142,7 +143,8 @@ echo -e "${NC}"
 if [ -z `echo "${basicPorts}"` ]; then
         echo -e "${YELLOW}No ports in quick scan.. Skipping!"
 else
-	$nmapType -sCV -p`echo "${basicPorts}"` -oN nmap/Basic_$1.nmap $1 
+	#$nmapType -sCV -p`echo "${basicPorts}"` -oN nmap/Basic_$1.nmap $1 
+	$nmapType -sCV -p`echo "${basicPorts}"` -oN nmap/Basic_$1.nmap -oX nmap/Basic_$1.xml $1 
 fi
 
 if [ -f nmap/Basic_$1.nmap ] && [[ ! -z `cat nmap/Basic_$1.nmap | grep -w "Service Info: OS:"` ]]; then
@@ -165,7 +167,8 @@ UDPScan(){
 echo -e "${GREEN}----------------------Starting Nmap UDP Scan----------------------"
 echo -e "${NC}"
 
-$nmapType -sU --max-retries 1 --open -oN nmap/UDP_$1.nmap $1
+#$nmapType -sU --max-retries 1 --open -oN nmap/UDP_$1.nmap $1
+$nmapType -sU --max-retries 1 --open -oN nmap/UDP_$1.nmap -oX nmap/UDP_$1.xml $1
 assignPorts $1
 
 if [ ! -z `echo "${udpPorts}"` ]; then
@@ -189,7 +192,8 @@ fullScan(){
 echo -e "${GREEN}---------------------Starting Nmap Full Scan----------------------"
 echo -e "${NC}"
 
-$nmapType -p- --max-retries 1 --max-rate 500 --max-scan-delay 20 -T4 -v -oN nmap/Full_$1.nmap $1
+#$nmapType -p- --max-retries 1 --max-rate 500 --max-scan-delay 20 -T4 -v -oN nmap/Full_$1.nmap $1
+$nmapType -p- --max-retries 1 --max-rate 500 --max-scan-delay 20 -T4 -v -oN nmap/Full_$1.nmap -oX nmap/Full_$1.xml $1
 assignPorts $1
 
 if [ -z `echo "${basicPorts}"` ]; then
@@ -505,11 +509,11 @@ else
 fi
 
 if [[ "$2" =~ ^(Quick|Basic|UDP|Full|Vulns|Recon|All)$ ]]; then
-	if [[ ! -d $1 ]]; then
-	        mkdir $1
-	fi
+	#if [[ ! -d $1 ]]; then
+	#        mkdir $1
+	#fi
 
-	cd $1
+	#cd $1
 	
 	if [[ ! -d nmap/ ]]; then
 	        mkdir nmap/
