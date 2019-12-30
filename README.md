@@ -15,7 +15,7 @@ Once you find the inital ports in around 10 seconds, you then can start manually
   
 # Features:
 1. **Quick:**	Shows all open ports quickly (~15 seconds)  
-1. **Basic:**	Runs Quick Scan, then a runs more thorough scan on found ports (~5 minutes)  
+1. **Basic:**	Runs Quick Scan, then runs a more thorough scan on found ports (~5 minutes)  
 1. **UDP:**	  Runs "Basic" on UDP ports (~5 minutes)  
 1. **Full:** 	Runs a full range port scan, then runs a thorough scan on new ports (~5-10 minutes)  
 1. **Vulns:**	Runs CVE scan and nmap Vulns scan on all found ports (~5-15 minutes)  
