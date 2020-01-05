@@ -49,7 +49,7 @@ fi
 '
 
 ttl=$(echo "${checkPing}" | tail -n 1)
-if [[  `echo "${ttl}"` != "nmap -Pn" ]]; then
+if [[  $(echo "${ttl}") != "nmap -Pn" ]]; then
 	osType="$(checkOS "$ttl")" 	
 	echo -e "${NC}"
 	echo -e "${GREEN}Host is likely running $osType"
