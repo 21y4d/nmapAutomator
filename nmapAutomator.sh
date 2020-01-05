@@ -530,12 +530,13 @@ if [[ "$2" =~ ^(Quick|Basic|UDP|Full|Vulns|Recon|All)$ ]]; then
 		Recon) 	if [ ! -f nmap/Quick_$1.nmap ]; then quickScan $1; fi
 			if [ ! -f nmap/Basic_$1.nmap ]; then basicScan $1; fi
 			recon $1;;
-		All)	quickScan $1
-			basicScan $1
-			UDPScan $1
-			fullScan $1
-			vulnsScan $1
-			recon $1;;
+		All)	quickScan "$1"
+			basicScan "$1"
+			UDPScan "$1"
+			fullScan "$1"
+			vulnsScan "$1"
+			recon "$1";;
+
 	esac
 	
 	footer
