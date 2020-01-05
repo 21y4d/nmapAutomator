@@ -33,7 +33,7 @@ else
 	echo -e "${YELLOW}Running a $2 scan on $1"
 fi
 
-subnet=`echo "$1" | cut -d "." -f 1,2,3`".0"
+subnet=$(echo "$1" | cut -d "." -f 1,2,3)".0"
 
 checkPing=`checkPing $1`
 nmapType="nmap -Pn"
