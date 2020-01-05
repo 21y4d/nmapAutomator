@@ -520,15 +520,15 @@ if [[ "$2" =~ ^(Quick|Basic|UDP|Full|Vulns|Recon|All)$ ]]; then
 	header $1 $2
 	
 	case "$2" in
-		Quick) 	quickScan $1;;
-		Basic)	if [ ! -f nmap/Quick_$1.nmap ]; then quickScan $1; fi
-			basicScan $1;;
-		UDP) 	UDPScan $1;;
-		Full) 	fullScan $1;;
-		Vulns) 	if [ ! -f nmap/Quick_$1.nmap ]; then quickScan $1; fi
-			vulnsScan $1;;
-		Recon) 	if [ ! -f nmap/Quick_$1.nmap ]; then quickScan $1; fi
-			if [ ! -f nmap/Basic_$1.nmap ]; then basicScan $1; fi
+		Quick) 	quickScan "$1";;
+		Basic)	if [ ! -f nmap/Quick_"$1".nmap ]; then quickScan "$1"; fi
+			basicScan "$1";;
+		UDP) 	UDPScan "$1";;
+		Full) 	fullScan "$1";;
+		Vulns) 	if [ ! -f nmap/Quick_"$1".nmap ]; then quickScan "$1"; fi
+			vulnsScan "$1";;
+		Recon) 	if [ ! -f nmap/Quick_"$1".nmap ]; then quickScan "$1"; fi
+			if [ ! -f nmap/Basic_"$1".nmap ]; then basicScan "$1"; fi
 			recon $1;;
 		All)	quickScan "$1"
 			basicScan "$1"
