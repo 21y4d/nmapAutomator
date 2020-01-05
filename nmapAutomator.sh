@@ -61,7 +61,7 @@ echo -e ""
 }
 
 assignPorts(){
-if [ -f nmap/Quick_$1.nmap ]; then
+if [ -f nmap/Quick_"$1".nmap ]; then
 	basicPorts=`cat nmap/Quick_$1.nmap | grep open | cut -d " " -f 1 | cut -d "/" -f 1 | tr "\n" "," | cut -c3- | head -c-2`
 fi
 
