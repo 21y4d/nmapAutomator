@@ -252,7 +252,7 @@ fi
 echo ""
 echo -e "${YELLOW}Running Vuln scan on $portType ports"
 echo -e "${NC}"
-$nmapType -sV --script vuln -p$(echo "${ports}") -oN nmap/Vulns_"$1".nmap "$1"
+$nmapType -sV --script vuln -p`echo "${ports}"` -oN nmap/Vulns_$1.nmap $1
 echo -e ""
 echo -e ""
 echo -e ""
