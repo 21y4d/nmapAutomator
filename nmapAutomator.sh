@@ -35,7 +35,7 @@ fi
 
 subnet=$(echo "$1" | cut -d "." -f 1,2,3)".0"
 
-checkPing=`checkPing $1`
+checkPing=$(checkPing "$1")
 nmapType="nmap -Pn"
 
 : '
@@ -48,7 +48,7 @@ if [ "$nmapType" != "nmap" ]; then
 fi
 '
 
-ttl=`echo "${checkPing}" | tail -n 1`
+ttl=$(echo "${checkPing}" | tail -n 1)
 if [[  `echo "${ttl}"` != "nmap -Pn" ]]; then
 	osType="$(checkOS $ttl)"	
 	echo -e "${NC}"
@@ -87,7 +87,7 @@ if [[ -z $pingTest ]]; then
 	echo "nmap -Pn"
 else
 	echo "nmap"
-	ttl=`echo "${pingTest}" | cut -d " " -f 6 | cut -d "=" -f 2`
+	ttl=$(echo "${pingTest}" | cut -d " " -f 6 | cut -d "=" -f 2)
 	echo "${ttl}"
 fi
 }
