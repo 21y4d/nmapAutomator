@@ -235,19 +235,10 @@ else
 	ports=`echo "${allPorts}"`
 fi
 
-
-if [ ! -f /usr/share/nmap/scripts/vulners.nse ]; then
-	echo -e "${RED}Please install 'vulners.nse' nmap script:"
-	echo -e "${RED}https://github.com/vulnersCom/nmap-vulners"
-        echo -e "${RED}"
-        echo -e "${RED}Skipping CVE scan!"
-	echo -e "${NC}"
-else    
-	echo -e "${YELLOW}Running CVE scan on $portType ports"
-	echo -e "${NC}"
-	$nmapType -sV --script vulners --script-args mincvss=7.0 -p`echo "${ports}"` -oN nmap/CVEs_$1.nmap $1
-	echo ""
-fi
+echo -e "${YELLOW}Running CVE scan on $portType ports"
+echo -e "${NC}"
+$nmapType -sV --script vulners --script-args mincvss=7.0 -p`echo "${ports}"` -oN nmap/CVEs_$1.nmap $1
+echo ""
 
 echo ""
 echo -e "${YELLOW}Running Vuln scan on $portType ports"
