@@ -39,10 +39,12 @@ https://github.com/vulnersCom/nmap-vulners
   
   
 # Examples of use:
+```
 ./nmapAutomator.sh <TARGET-IP> <TYPE>  
 ./nmapAutomator.sh 10.1.1.1 All  
 ./nmapAutomator.sh 10.1.1.1 Basic  
 ./nmapAutomator.sh 10.1.1.1 Recon  
+```
 
 **If you want to use it anywhere on the system, create a shortcut using:**  
 ```ln -s /PATH-TO-FOLDER/nmapAutomator.sh /usr/local/bin/```
