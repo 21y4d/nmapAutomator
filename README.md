@@ -34,8 +34,18 @@ You can update gobuster on kali using:
 apt-get update
 apt-get install gobuster --only-upgrade  
 ```
-**Recommended:** nmap vulners scrip "for CVE scan"  
-https://github.com/vulnersCom/nmap-vulners  
+
+Other Recon tools used within the script include:
+* [nmap Vulners](https://github.com/vulnersCom/nmap-vulners)
+* [sslscan](https://github.com/rbsec/sslscan)
+* [nikto](https://github.com/sullo/nikto)
+* [joomscan](https://github.com/rezasp/joomscan)
+* [wpscan](https://github.com/wpscanteam/wpscan)
+* [droopescan](https://github.com/droope/droopescan)
+* [smbmap](https://github.com/ShawnDEvans/smbmap)
+* [enum4linux](https://github.com/portcullislabs/enum4linux)
+* [dnsrecon](https://github.com/darkoperator/dnsrecon)
+* [odat](https://github.com/quentinhardy/odat)
   
   
 # Examples of use:
