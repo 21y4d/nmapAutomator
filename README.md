@@ -23,6 +23,8 @@ Once you find the inital ports in around 10 seconds, you then can start manually
 1. **All:**  	Runs all the scans consecutively (~20-30 minutes)  
   
 I tried to make the script as efficient as possible, so that you would get the results as fast as possible, without duplicating any work.  
+
+Feel free to send your pull requests and contributions :)
   
   
 # Requirements:
