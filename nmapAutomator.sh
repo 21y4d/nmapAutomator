@@ -407,7 +407,18 @@ if [[ ! -z $(echo "${file}" | grep -w "53/tcp") ]]; then
 	echo "host -l $1 $1 | tee recon/hostname_$1.txt"
 	echo "dnsrecon -r $subnet/24 -n $1 | tee recon/dnsrecon_$1.txt"
 	echo "dnsrecon -r 127.0.0.0/24 -n $1 | tee recon/dnsrecon-local_$1.txt"
+	echo "dig -x $1 @$1 | tee recon/dig_$1.txt"
 	echo ""
+fi
+
+if [[ ! -z $(echo "${file}" | grep -w "389/tcp") ]]; then
+        echo -e "${NC}"
+        echo -e "${YELLOW}ldap Recon:"
+        echo -e "${NC}"
+        echo "nmap --script all -p389 $1 -oN recon/nmap_ldap_$1.txt"
+        echo "ldapsearch -x -h $1 -s base | tee recon/ldapsearch_$1.txt"
+        echo "ldapsearch -x -h $1 -b \$(cat recon/ldapsearch_$1.txt | grep rootDomainNamingContext | cut -d ' ' -f2) | tee recon/ldapsearch_DC_$1.txt"
+        echo ""
 fi
 
 if [[ ! -z $(echo "${file}" | grep -w "1521/tcp") ]]; then
