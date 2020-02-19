@@ -415,10 +415,10 @@ if [[ ! -z $(echo "${file}" | grep -w "389/tcp") ]]; then
         echo -e "${NC}"
         echo -e "${YELLOW}ldap Recon:"
         echo -e "${NC}"
-        echo "nmap --script all -p389 $1 -oN recon/nmap_ldap_$1.txt"
         echo "ldapsearch -x -h $1 -s base | tee recon/ldapsearch_$1.txt"
         echo "ldapsearch -x -h $1 -b \$(cat recon/ldapsearch_$1.txt | grep rootDomainNamingContext | cut -d ' ' -f2) | tee recon/ldapsearch_DC_$1.txt"
-        echo ""
+        echo "nmap -Pn -p 389 --script ldap-search --script-args 'ldap.username=\"\$(cat recon/ldapsearch_$1.txt | grep rootDomainNamingContext | cut -d \\" \\" -f2)\"' $1 -oN recon/nmap_ldap_$1.txt"
+	echo ""
 fi
 
 if [[ ! -z $(echo "${file}" | grep -w "1521/tcp") ]]; then
