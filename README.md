@@ -30,7 +30,7 @@ Feel free to send your pull requests and contributions :)
 # Requirements:
 **Required:** Gobuster v3.0 or higher, as it is not backward compatible.  
 You can update gobuster on kali using:  
-```
+```bash
 apt-get update
 apt-get install gobuster --only-upgrade  
 ```
@@ -49,7 +49,7 @@ Other Recon tools used within the script include:
   
   
 # Examples of use:
-```
+```bash
 ./nmapAutomator.sh <TARGET-IP> <TYPE>  
 ./nmapAutomator.sh 10.1.1.1 All  
 ./nmapAutomator.sh 10.1.1.1 Basic  
@@ -57,4 +57,11 @@ Other Recon tools used within the script include:
 ```
 
 **If you want to use it anywhere on the system, create a shortcut using:**  
-```ln -s /PATH-TO-FOLDER/nmapAutomator.sh /usr/local/bin/```
+`ln -s /PATH-TO-FOLDER/nmapAutomator.sh /usr/local/bin/`
+
+
+# TODO features list
+_**pull requests are more than welcome :)**_
+* Supporting DNS resolution "use of urls/domains instead of IPs"
+* Properly identifying url extensions "testing index extensions for 200"
+* Adding more recon options
