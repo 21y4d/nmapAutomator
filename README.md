@@ -62,6 +62,7 @@ Other Recon tools used within the script include:
 
 # TODO features list
 _**pull requests are more than welcome :)**_
-* Supporting DNS resolution "use of urls/domains instead of IPs"
-* Properly identifying url extensions "testing index extensions for 200"
-* Adding more recon options
+* Support DNS resolution "use of urls/domains instead of IPs"
+* Properly identify url extensions "testing index extensions for code 200"
+* Add more port-based automatic recon options
+* Add an nmap progress bar
