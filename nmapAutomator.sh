@@ -333,7 +333,7 @@ for line in $file; do
 	if [[ ! -z $(echo "${line}" | grep -i http) ]]; then
 		port=$(echo "${line}" | cut -d "/" -f 1)
 		if [[ ! -z $(echo "${line}" | grep -w "IIS") ]]; then
-			pages=".html,.asp,.php"
+			pages=".html,.asp,.aspx,.php"
 		else
 			pages=".html,.php"
 		fi
