@@ -20,7 +20,7 @@ echo -e "\tFull:	Runs a full range port scan, then runs a thorough scan on new p
 echo -e "\tVulns:	Runs CVE scan and nmap Vulns scan on all found ports (~5-15 minutes)"
 echo -e "\tRecon:	Suggests recon commands, then prompts to automatically run them"
 echo -e "\tAll:	Runs all the scans (~20-30 minutes)"
-echo -e ""
+echo -e "${NC}"
 exit 1
 }
 
