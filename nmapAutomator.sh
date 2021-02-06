@@ -142,7 +142,12 @@ if [[ -z $pingTest ]]; then
         echo "nmap -Pn"
 else
         echo "nmap"
-        ttl=$(echo "${pingTest}" | cut -d " " -f 6 | cut -d "=" -f 2)
+        # Checking if the host address in argument is an IP or domain name
+        if [[ "${HOST}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                ttl=$(echo "${pingTest}" | cut -d " " -f 6 | cut -d "=" -f 2)
+        else
+                ttl=$(echo "${pingTest}" | cut -d " " -f 7 | cut -d "=" -f 2)
+        fi
         echo "${ttl}"
 fi
 }
