@@ -1,19 +1,20 @@
 # nmapAutomator
+
 A script that you can run in the background!
   
   
-# Summary
-I have created this script as I was preparing for my OSCP exam.  
+## Summary
+
 The main goal for this script is to automate all of the process of recon/enumeration that is run every time, and instead focus our attention on real pen testing.  
   
 This will ensure two things:  
 	1) Automate nmap scans. 
 	2) Always have some recon running in the background. 
 
-Once you find the inital ports in around 10 seconds, you then can start manually looking into those ports, and let the rest run in the background with no interaction from your side whatsoever.  
+Once initial ports are found '*in around 10 seconds*', we can start manually looking into those ports, and let the rest run in the background with no interaction from our side whatsoever.  
   
   
-# Features:
+## Features:
 1. **Quick:**	Shows all open ports quickly (~15 seconds)  
 1. **Basic:**	Runs Quick Scan, then runs a more thorough scan on found ports (~5 minutes)  
 1. **UDP:**	  Runs "Basic" on UDP ports (~5 minutes)  
@@ -22,17 +23,18 @@ Once you find the inital ports in around 10 seconds, you then can start manually
 1. **Recon:**	Runs "Basic" scan "if not yet run", then suggests recon commands "i.e. gobuster, nikto, smbmap" based on the found ports, then prompts to automatically run them  
 1. **All:**  	Runs all the scans consecutively (~20-30 minutes)  
   
-I tried to make the script as efficient as possible, so that you would get the results as fast as possible, without duplicating any work.  
-
-Feel free to send your pull requests and contributions :)
   
-  
-# Requirements:
-**Required:** Gobuster v3.0 or higher, as it is not backward compatible.  
-You can update gobuster on kali using:  
+## Requirements:
+[Gobuster](https://github.com/OJ/gobuster) '*v3.0 or higher*', which we can install with:  
 ```bash
-apt-get update
-apt-get install gobuster --only-upgrade  
+sudo apt update
+sudo apt install gobuster
+```
+
+or [ffuf](https://github.com/ffuf/ffuf), which we can install with:
+```bash
+sudo apt update
+sudo apt install ffuf
 ```
 
 Other Recon tools used within the script include:
@@ -48,7 +50,7 @@ Other Recon tools used within the script include:
 * [odat](https://github.com/quentinhardy/odat)
   
   
-# Examples of use:
+## Examples of use:
 ```bash
 ./nmapAutomator.sh <TARGET-IP> <TYPE>  
 ./nmapAutomator.sh 10.1.1.1 All  
@@ -56,13 +58,16 @@ Other Recon tools used within the script include:
 ./nmapAutomator.sh 10.1.1.1 Recon  
 ```
 
-**If you want to use it anywhere on the system, create a shortcut using:**  
-`ln -s /PATH-TO-FOLDER/nmapAutomator.sh /usr/local/bin/`
+## Installation:
+```bash
+git clone https://github.com/21y4d/nmapAutomator.git
+sudo ln -s $(pwd)/nmapAutomator/nmapAutomator.sh /usr/local/bin/
+```
 
 
-# TODO features list
-_**pull requests are more than welcome :)**_
-- [x] Support DNS resolution "use of urls/domains instead of IPs" - Done, thanks @KatsuragiCSL
-- [ ] Properly identify url extensions "testing index extensions for code 200"
+## TODO features list
+**Feel free to send your pull requests and contributions :)**
+- [x] ~~Support DNS resolution "use of urls/domains instead of IPs"~~ - Done, thanks @KatsuragiCSL
+- [x] ~~Properly identify url extensions "testing index extensions for code 200"~~
 - [ ] Add more port-based automatic recon options
 - [ ] Add an nmap progress bar
