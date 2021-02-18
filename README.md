@@ -53,7 +53,7 @@ Other Recon tools used within the script include:
 ## Examples of use:
 ```bash
 ./nmapAutomator.sh -h
-./nmapAutomator.sh --host <TARGET-IP> --type <TYPE> [--dns <DNS SERVER>]
+Usage: ./nmapAutomator.sh --host <TARGET-IP> --type <TYPE> [--dns <DNS SERVER>]
 
 ./nmapAutomator.sh --host 10.1.1.1 --type All
 ./nmapAutomator.sh -H 10.1.1.1 -t Basic
