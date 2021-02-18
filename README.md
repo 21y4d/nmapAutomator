@@ -48,11 +48,13 @@ Other Recon tools used within the script include:
 * [enum4linux](https://github.com/portcullislabs/enum4linux)
 * [dnsrecon](https://github.com/darkoperator/dnsrecon)
 * [odat](https://github.com/quentinhardy/odat)
+* [smtp-user-enum](https://github.com/pentestmonkey/smtp-user-enum)
   
   
 ## Examples of use:
 ```bash
-./nmapAutomator.sh <TARGET-IP> <TYPE>  
+./nmapAutomator.sh <TARGET-IP> <TYPE>
+./nmapAutomator.sh --host=<TARGET-IP> --type=<TYPE> --dns=<DNS-SERVER>    
 ./nmapAutomator.sh 10.1.1.1 All  
 ./nmapAutomator.sh 10.1.1.1 Basic  
 ./nmapAutomator.sh 10.1.1.1 Recon  
