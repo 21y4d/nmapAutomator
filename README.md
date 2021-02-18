@@ -52,10 +52,10 @@ Other Recon tools used within the script include:
   
 ## Examples of use:
 ```bash
-./nmapAutomator.sh <TARGET-IP> <TYPE>  
-./nmapAutomator.sh 10.1.1.1 All  
-./nmapAutomator.sh 10.1.1.1 Basic  
-./nmapAutomator.sh 10.1.1.1 Recon  
+./nmapAutomator.sh --host <TARGET-IP> --type <TYPE> [--dns <DNS SERVER>]
+./nmapAutomator.sh --host 10.1.1.1 --type All  
+./nmapAutomator.sh --host 10.1.1.1 --type Basic  
+./nmapAutomator.sh www.github.com --type Recon --dns 1.1.1.1
 ```
 
 ## Installation:
