@@ -423,7 +423,7 @@ reconRecommend() {
 		echo -e "${NC}"
 		echo -e "${YELLOW}SMTP Recon:"
 		echo -e "${NC}"
-		echo "smtp-user-enum -U /usr/share/metasploit-framework/data/wordlists/unix_users.txt -t ${HOST} | tee recon/smtp_user_enum_${HOST}.txt"
+		echo "smtp-user-enum -U /usr/share/wordlists/metasploit/unix_users.txt -t ${HOST} | tee recon/smtp_user_enum_${HOST}.txt"
 		echo ""
 	fi
 
