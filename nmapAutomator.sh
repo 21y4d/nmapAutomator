@@ -419,6 +419,14 @@ reconRecommend() {
                 fi
         fi
 
+	if [[ ! -z $(echo "${file}" | grep -w "25/tcp") ]]; then
+		echo -e "${NC}"
+		echo -e "${YELLOW}SMTP Recon:"
+		echo -e "${NC}"
+		echo "smtp-user-enum -U /usr/share/wordlists/metasploit/unix_users.txt -t ${HOST} | tee recon/smtp_user_enum_${HOST}.txt"
+		echo ""
+	fi
+
         if [[ ! -z $(echo "${file}" | grep -w "445/tcp") ]]; then
                 echo -e "${NC}"
                 echo -e "${YELLOW}SMB Recon:"
