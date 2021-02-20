@@ -72,5 +72,9 @@ sudo ln -s $(pwd)/nmapAutomator/nmapAutomator.sh /usr/local/bin/
 **Feel free to send your pull requests and contributions :)**
 - [x] ~~Support DNS resolution "use of urls/domains instead of IPs"~~ - Done, thanks @KatsuragiCSL
 - [x] ~~Properly identify url extensions "testing index extensions for code 200"~~
-- [ ] Add more port-based automatic recon options
 - [ ] Add an nmap progress bar
+
+
+## Add more recon options
+- If you would like to suggest or add more port-based recon options, you can base your pull request on the [following lines](https://github.com/21y4d/nmapAutomator/blob/17377bb42e0b2e99bd7d4b20efc878a0a0051025/nmapAutomator.sh#L422-L428).
+- If you would like to suggest more options for an existing port, you can add the new command under its port, similar to this [example line](https://github.com/21y4d/nmapAutomator/blob/17377bb42e0b2e99bd7d4b20efc878a0a0051025/nmapAutomator.sh#L447).
