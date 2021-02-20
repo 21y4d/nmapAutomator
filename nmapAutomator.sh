@@ -389,7 +389,7 @@ reconRecommend() {
                                 urlType='http://'
                                 echo "nikto -host $urlType${HOST}:$port | tee recon/nikto_${HOST}_$port.txt"
                         fi
-                        if [[ ! -z $(which ffuf) ]]; then
+                        if [[ ! -z $(which ffuf | grep bin) ]]; then
                                 extensions=$(echo 'index' >./index && ffuf -s -w ./index:FUZZ -mc '200' -e '.asp,.aspx,.html,.jsp,.php' -u $urlType${HOST}:$port/FUZZ 2>/dev/null | awk -F 'index' {'print $2'} | tr '\n' ',' | head -c-1 && rm ./index)
                                 echo "ffuf -ic -w /usr/share/wordlists/dirb/common.txt -e '$extensions' -u $urlType${HOST}:$port/FUZZ | tee recon/ffuf_${HOST}_$port.txt"
                         else
