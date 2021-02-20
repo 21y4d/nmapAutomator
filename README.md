@@ -5,24 +5,25 @@ A script that you can run in the background!
   
 ## Summary
 
-The main goal for this script is to automate all of the process of recon/enumeration that is run every time, and instead focus our attention on real pen testing.  
+The main goal for this script is to automate the process of enumeration & recon that is run every time, and instead focus our attention on real pentesting.  
   
 This will ensure two things:  
-	1) Automate nmap scans. 
-	2) Always have some recon running in the background. 
+1. Automate nmap scans. 
+2. Always have some recon running in the background. 
 
-Once initial ports are found '*in around 10 seconds*', we can start manually looking into those ports, and let the rest run in the background with no interaction from our side whatsoever.  
+Once initial ports are found '*in 5-10 seconds*', we can start manually looking into those ports, and let the rest run in the background with no interaction from our side whatsoever.  
   
   
 ## Features:
-1. **Quick:**	Shows all open ports quickly (~15 seconds)  
-1. **Basic:**	Runs Quick Scan, then runs a more thorough scan on found ports (~5 minutes)  
-1. **UDP:**	  Runs "Basic" on UDP ports (~5 minutes)  
-1. **Full:** 	Runs a full range port scan, then runs a thorough scan on new ports (~5-10 minutes)  
-1. **Vulns:**	Runs CVE scan and nmap Vulns scan on all found ports (~5-15 minutes)  
-1. **Recon:**	Runs "Basic" scan "if not yet run", then suggests recon commands "i.e. gobuster, nikto, smbmap" based on the found ports, then prompts to automatically run them  
-1. **All:**  	Runs all the scans consecutively (~20-30 minutes)  
+1. **Quick:** Shows all open ports quickly (~15 seconds)  
+1. **Basic:** Runs Quick Scan, then runs a more thorough scan on found ports (~5 minutes)  
+1. **UDP:** Runs "Basic" on UDP ports (~5 minutes)  
+1. **Full:** Runs a full range port scan, then runs a thorough scan on new ports (~5-10 minutes)  
+1. **Vulns:** Runs CVE scan and nmap Vulns scan on all found ports (~5-15 minutes)  
+1. **Recon:** Runs "Basic" scan "if not yet run", then suggests recon commands "i.e. gobuster, nikto, smbmap" based on the found ports, then prompts to automatically run them  
+1. **All:** Runs all the scans consecutively (~20-30 minutes)  
   
+  -----
   
 ## Requirements:
 [Gobuster](https://github.com/OJ/gobuster) '*v3.0 or higher*', which we can install with:  
@@ -50,7 +51,14 @@ Other Recon tools used within the script include:
 * [odat](https://github.com/quentinhardy/odat)
 * [smtp-user-enum](https://github.com/pentestmonkey/smtp-user-enum)
   
+*Most of these should be installed by default in [Parrot OS](https://www.parrotsec.org) and [Kali Linux](https://www.kali.org).*
   
+## Installation:
+```bash
+git clone https://github.com/21y4d/nmapAutomator.git
+sudo ln -s $(pwd)/nmapAutomator/nmapAutomator.sh /usr/local/bin/
+```
+
 ## Examples of use:
 ```bash
 ./nmapAutomator.sh -h
@@ -61,12 +69,7 @@ Usage: ./nmapAutomator.sh --host <TARGET-IP> --type <TYPE> [--dns <DNS SERVER>]
 ./nmapAutomator.sh -H www.github.com -t Recon -d 1.1.1.1
 ```
 
-## Installation:
-```bash
-git clone https://github.com/21y4d/nmapAutomator.git
-sudo ln -s $(pwd)/nmapAutomator/nmapAutomator.sh /usr/local/bin/
-```
-
+------
 
 ## TODO features list
 **Feel free to send your pull requests and contributions :)**
