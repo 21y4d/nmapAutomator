@@ -61,10 +61,22 @@ sudo ln -s $(pwd)/nmapAutomator/nmapAutomator.sh /usr/local/bin/
 ```
 
 ## Examples of use:
-```bash
+```
 ./nmapAutomator.sh -h
-Usage: ./nmapAutomator.sh --host <TARGET-IP> --type <TYPE> [--dns <DNS SERVER>]
+Usage: ./nmapAutomator.sh -H/--host <TARGET-IP> -t/--type <TYPE> [-d/--dns <DNS SERVER>]
 
+Scan Types:
+	Quick: Shows all open ports quickly (~15 seconds)
+	Basic: Runs Quick Scan, then runs a more thorough scan on found ports (~5 minutes)
+	UDP  : Runs "Basic" on UDP ports "requires sudo" (~5 minutes)
+	Full : Runs a full range port scan, then runs a thorough scan on new ports (~5-10 minutes)
+	Vulns: Runs CVE scan and nmap Vulns scan on all found ports (~5-15 minutes)
+	Recon: Suggests recon commands, then prompts to automatically run them
+	All  : Runs all the scans (~20-30 minutes)
+```
+
+**Example commands**:
+```
 ./nmapAutomator.sh --host 10.1.1.1 --type All
 ./nmapAutomator.sh -H 10.1.1.1 -t Basic
 ./nmapAutomator.sh -H www.github.com -t Recon -d 1.1.1.1
