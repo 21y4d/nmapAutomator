@@ -1,5 +1,5 @@
 #!/bin/bash
-#by 21y4d
+#by @21y4d
 
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
@@ -57,16 +57,16 @@ fi
 
 usage() {
         echo -e ""
-        echo -e "${RED}Usage: $0 --host <TARGET-IP> --type <TYPE> [--dns <DNS SERVER>]"
+        echo -e "${RED}Usage: $0 -H/--host <TARGET-IP> -t/--type <TYPE> [-d/--dns <DNS SERVER>]"
         echo -e "${YELLOW}"
         echo -e "Scan Types:"
-        echo -e "\tQuick:       Shows all open ports quickly (~15 seconds)"
-        echo -e "\tBasic:       Runs Quick Scan, then runs a more thorough scan on found ports (~5 minutes)"
-        echo -e "\tUDP: Runs \"Basic\" on UDP ports \"requires sudo\" (~5 minutes)"
-        echo -e "\tFull:        Runs a full range port scan, then runs a thorough scan on new ports (~5-10 minutes)"
-        echo -e "\tVulns:       Runs CVE scan and nmap Vulns scan on all found ports (~5-15 minutes)"
-        echo -e "\tRecon:       Suggests recon commands, then prompts to automatically run them"
-        echo -e "\tAll: Runs all the scans (~20-30 minutes)"
+        echo -e "\tQuick: Shows all open ports quickly (~15 seconds)"
+        echo -e "\tBasic: Runs Quick Scan, then runs a more thorough scan on found ports (~5 minutes)"
+        echo -e "\tUDP  : Runs \"Basic\" on UDP ports \"requires sudo\" (~5 minutes)"
+        echo -e "\tFull : Runs a full range port scan, then runs a thorough scan on new ports (~5-10 minutes)"
+        echo -e "\tVulns: Runs CVE scan and nmap Vulns scan on all found ports (~5-15 minutes)"
+        echo -e "\tRecon: Suggests recon commands, then prompts to automatically run them"
+        echo -e "\tAll  : Runs all the scans (~20-30 minutes)"
         echo -e "${NC}"
         exit 1
 }
@@ -83,17 +83,13 @@ header() {
         subnet=$(echo ${HOST} | cut -d "." -f 1,2,3)".0"
 
         checkPing=$(checkPing ${HOST})
-        nmapType="nmap -Pn"
+        nmapType=$(echo "${checkPing}" | head -n 1)
 
-        : '
-        #nmapType=`echo "${checkPing}" | head -n 1`
-
-        if [ "$nmapType" != "nmap" ]; then 
+        if [ "$nmapType" != "nmap" ]; then
                 echo -e "${NC}"
                 echo -e "${YELLOW}No ping detected.. Running with -Pn option!"
                 echo -e "${NC}"
         fi
-        '
 
         ttl=$(echo "${checkPing}" | tail -n 1)
         if [[ $(echo "${ttl}") != "nmap -Pn" ]]; then
@@ -173,11 +169,37 @@ cmpPorts() {
         IFS=$oldIFS
 }
 
+progressBar() {
+        [[ ! $(stty size | cut -d ' ' -f 2) -gt 120 ]] && width=50 || width=100
+        fill=$(printf "%-$(($width == 100 ? $2 : $(($2 / 2))))s" "#")
+        empty=$(printf "%-$(($width - $(($width == 100 ? $2 : $(($2 / 2))))))s" " ")
+        echo -e "In progress: ${1} Scan (${3} elapsed - ${4} remaining)   "
+        echo -e "[${fill// /\#}>${empty// / }] ${2}% done   "
+        echo -ne "\e[2A"
+}
+
+nmapProgressBar() {
+        outputFile=$(echo ${1} | sed -e 's/.*-oN \(.*\).nmap.*/\1/').nmap
+        tmpOutputFile=${outputFile}.tmp
+        ${1} --stats-every 0.5s >${tmpOutputFile} 2>&1 &
+
+        while [[ (! -e $outputFile || -z $(grep "Nmap done at" $outputFile)) && (! -e $tmpOutputFile || -z $(grep -i "quitting" $tmpOutputFile)) ]]; do
+                scanType=$(cat ${tmpOutputFile} | tail -n 2 | grep --line-buffered 'elapsed' | sed -e 's/.*undergoing \(.*\) Scan.*/\1/')
+                percent=$(cat ${tmpOutputFile} | tail -n 2 | grep --line-buffered '% done' | sed -e 's/.*About \(.*\)\..*% done.*/\1/')
+                elapsed=$(cat ${tmpOutputFile} | tail -n 2 | grep --line-buffered 'elapsed' | sed -e 's/Stats: \(.*\) elapsed.*/\1/')
+                remaining=$(cat ${tmpOutputFile} | tail -n 2 | grep --line-buffered 'remaining' | sed -e 's/.* (\(.*\) remaining.*/\1/')
+                progressBar ${scanType:="No"} ${percent:=0} ${elapsed:="0:00:00"} ${remaining:="0:00:00"}
+        done
+        echo -e "\033[0K\r\n\033[0K\r"
+        if [[ -e $outputFile ]]; then cat $outputFile | sed -n '/PORT.*STATE.*SERVICE/,/Nmap done at.*/p' | head -n-2; else cat $tmpOutputFile; fi
+        rm $tmpOutputFile
+}
+
 quickScan() {
         echo -e "${GREEN}---------------------Starting Nmap Quick Scan---------------------"
         echo -e "${NC}"
 
-        $nmapType -T4 --max-retries 1 --max-scan-delay 20 --defeat-rst-ratelimit --open -oN nmap/Quick_"${HOST}".nmap "${HOST}" "${DNSSTRING}"
+        nmapProgressBar "$nmapType -T4 --max-retries 1 --max-scan-delay 20 --defeat-rst-ratelimit --open -oN nmap/Quick_${HOST}.nmap ${HOST} ${DNSSTRING}"
         assignPorts "${HOST}"
 
         echo -e ""
@@ -192,7 +214,7 @@ basicScan() {
         if [ -z $(echo "${basicPorts}") ]; then
                 echo -e "${YELLOW}No ports in quick scan.. Skipping!"
         else
-                $nmapType -sCV -p$(echo "${basicPorts}") -oN nmap/Basic_"${HOST}".nmap "${HOST}" "${DNSSTRING}"
+                nmapProgressBar "$nmapType -sCV -p$(echo ${basicPorts}) -oN nmap/Basic_${HOST}.nmap ${HOST} ${DNSSTRING}"
         fi
 
         if [ -f nmap/Basic_"${HOST}".nmap ] && [[ ! -z $(cat nmap/Basic_"${HOST}".nmap | grep -w "Service Info: OS:") ]]; then
@@ -215,7 +237,12 @@ UDPScan() {
         echo -e "${GREEN}----------------------Starting Nmap UDP Scan----------------------"
         echo -e "${NC}"
 
-        $nmapType -sU --max-retries 1 --open -oN nmap/UDP_"${HOST}".nmap "${HOST}" "${DNSSTRING}"
+        if [[ $(whoami) != 'root' ]]; then
+                echo "UDP needs to be run as root, running with sudo..."
+                sudo -v
+        fi
+
+        nmapProgressBar "sudo $nmapType -sU --max-retries 1 --open -oN nmap/UDP_${HOST}.nmap ${HOST} ${DNSSTRING}"
         assignPorts "${HOST}"
 
         if [ ! -z $(echo "${udpPorts}") ]; then
@@ -224,9 +251,9 @@ UDPScan() {
                 echo -e "${YELLOW}Making a script scan on UDP ports: $(echo "${udpPorts}" | sed 's/,/, /g')"
                 echo -e "${NC}"
                 if [ -f /usr/share/nmap/scripts/vulners.nse ]; then
-                        $nmapType -sCVU --script vulners --script-args mincvss=7.0 -p$(echo "${udpPorts}") -oN nmap/UDP_"${HOST}".nmap "${HOST}" "${DNSSTRING}"
+                        nmapProgressBar "$nmapType -sCVU --script vulners --script-args mincvss=7.0 -p$(echo ${udpPorts}) -oN nmap/UDP_${HOST}.nmap ${HOST} ${DNSSTRING}"
                 else
-                        $nmapType -sCVU -p$(echo "${udpPorts}") -oN nmap/UDP_"${HOST}".nmap "${HOST}" "${DNSSTRING}"
+                        nmapProgressBar "$nmapType -sCVU -p$(echo ${udpPorts}) -oN nmap/UDP_${HOST}.nmap ${HOST} ${DNSSTRING}"
                 fi
         fi
 
@@ -239,7 +266,7 @@ fullScan() {
         echo -e "${GREEN}---------------------Starting Nmap Full Scan----------------------"
         echo -e "${NC}"
 
-        $nmapType -p- --max-retries 1 --max-rate 500 --max-scan-delay 20 -T4 -v -oN nmap/Full_"${HOST}".nmap "${HOST}" "${DNSSTRING}"
+        nmapProgressBar "$nmapType -p- --max-retries 1 --max-rate 500 --max-scan-delay 20 -T4 -v -oN nmap/Full_${HOST}.nmap ${HOST} ${DNSSTRING}"
         assignPorts "${HOST}"
 
         if [ -z $(echo "${basicPorts}") ]; then
@@ -247,7 +274,7 @@ fullScan() {
                 echo ""
                 echo -e "${YELLOW}Making a script scan on all ports"
                 echo -e "${NC}"
-                $nmapType -sCV -p$(echo "${allPorts}") -oN nmap/Full_"${HOST}".nmap "${HOST}" "${DNSSTRING}"
+                nmapProgressBar "$nmapType -sCV -p$(echo ${allPorts}) -oN nmap/Full_${HOST}.nmap ${HOST} ${DNSSTRING}"
                 assignPorts "${HOST}"
         else
                 cmpPorts "${HOST}"
@@ -263,7 +290,7 @@ fullScan() {
                         echo ""
                         echo -e "${YELLOW}Making a script scan on extra ports: $(echo "${extraPorts}" | sed 's/,/, /g')"
                         echo -e "${NC}"
-                        $nmapType -sCV -p$(echo "${extraPorts}") -oN nmap/Full_"${HOST}".nmap "${HOST}" "${DNSSTRING}"
+                        nmapProgressBar "$nmapType -sCV -p$(echo ${extraPorts}) -oN nmap/Full_${HOST}.nmap ${HOST} ${DNSSTRING}"
                         assignPorts "${HOST}"
                 fi
         fi
@@ -294,14 +321,14 @@ vulnsScan() {
         else
                 echo -e "${YELLOW}Running CVE scan on $portType ports"
                 echo -e "${NC}"
-                $nmapType -sV --script vulners --script-args mincvss=7.0 -p$(echo "${ports}") -oN nmap/CVEs_"${HOST}".nmap "${HOST}" "${DNSSTRING}"
+                nmapProgressBar "$nmapType -sV --script vulners --script-args mincvss=7.0 -p$(echo ${ports}) -oN nmap/CVEs_${HOST}.nmap ${HOST} ${DNSSTRING}"
                 echo ""
         fi
 
         echo ""
         echo -e "${YELLOW}Running Vuln scan on $portType ports"
         echo -e "${NC}"
-        $nmapType -sV --script vuln -p$(echo "${ports}") -oN nmap/Vulns_"${HOST}".nmap "${HOST}" "${DNSSTRING}"
+        nmapProgressBar "$nmapType -sV --script vuln -p$(echo ${ports}) -oN nmap/Vulns_${HOST}.nmap ${HOST} ${DNSSTRING}"
         echo -e ""
         echo -e ""
         echo -e ""
@@ -419,13 +446,13 @@ reconRecommend() {
                 fi
         fi
 
-	if [[ ! -z $(echo "${file}" | grep -w "25/tcp") ]]; then
-		echo -e "${NC}"
-		echo -e "${YELLOW}SMTP Recon:"
-		echo -e "${NC}"
-		echo "smtp-user-enum -U /usr/share/wordlists/metasploit/unix_users.txt -t ${HOST} | tee recon/smtp_user_enum_${HOST}.txt"
-		echo ""
-	fi
+        if [[ ! -z $(echo "${file}" | grep -w "25/tcp") ]]; then
+                echo -e "${NC}"
+                echo -e "${YELLOW}SMTP Recon:"
+                echo -e "${NC}"
+                echo "smtp-user-enum -U /usr/share/wordlists/metasploit/unix_users.txt -t ${HOST} | tee recon/smtp_user_enum_${HOST}.txt"
+                echo ""
+        fi
 
         if [[ ! -z $(echo "${file}" | grep -w "445/tcp") ]]; then
                 echo -e "${NC}"
