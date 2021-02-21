@@ -2,6 +2,7 @@
 
 A script that you can run in the background!
   
+![nmapAutomator](https://i.imgur.com/3cMJIPr.gif)
   
 ## Summary
 
@@ -75,7 +76,7 @@ Usage: ./nmapAutomator.sh --host <TARGET-IP> --type <TYPE> [--dns <DNS SERVER>]
 **Feel free to send your pull requests and contributions :)**
 - [x] ~~Support DNS resolution "use of urls/domains instead of IPs"~~ - Done, thanks @KatsuragiCSL
 - [x] ~~Properly identify url extensions "testing index extensions for code 200"~~
-- [ ] Add an nmap progress bar
+- [x] ~~Add an nmap progress bar~~
 
 
 ## Add more recon options
