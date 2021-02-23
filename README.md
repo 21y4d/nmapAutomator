@@ -1,6 +1,6 @@
 # nmapAutomator
 
-A script that you can run in the background!
+A script you can run in the background!
   
 ![nmapAutomator](https://i.imgur.com/3cMJIPr.gif)
   
