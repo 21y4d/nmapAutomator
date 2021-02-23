@@ -170,6 +170,7 @@ cmpPorts() {
 }
 
 progressBar() {
+        [[ -z "${2##*[!0-9]*}" ]] && return 1
         [[ ! $(stty size | cut -d ' ' -f 2) -gt 120 ]] && width=50 || width=100
         fill=$(printf "%-$(($width == 100 ? $2 : $(($2 / 2))))s" "#")
         empty=$(printf "%-$(($width - $(($width == 100 ? $2 : $(($2 / 2))))))s" " ")
@@ -179,16 +180,18 @@ progressBar() {
 }
 
 nmapProgressBar() {
+        refreshRate=${2:-"0.5"}
         outputFile=$(echo ${1} | sed -e 's/.*-oN \(.*\).nmap.*/\1/').nmap
         tmpOutputFile=${outputFile}.tmp
-        ${1} --stats-every 0.5s >${tmpOutputFile} 2>&1 &
+        ${1} --stats-every ${refreshRate}"s" >${tmpOutputFile} 2>&1 &
 
         while [[ (! -e $outputFile || -z $(grep "Nmap done at" $outputFile)) && (! -e $tmpOutputFile || -z $(grep -i "quitting" $tmpOutputFile)) ]]; do
                 scanType=$(cat ${tmpOutputFile} | tail -n 2 | grep --line-buffered 'elapsed' | sed -e 's/.*undergoing \(.*\) Scan.*/\1/')
                 percent=$(cat ${tmpOutputFile} | tail -n 2 | grep --line-buffered '% done' | sed -e 's/.*About \(.*\)\..*% done.*/\1/')
                 elapsed=$(cat ${tmpOutputFile} | tail -n 2 | grep --line-buffered 'elapsed' | sed -e 's/Stats: \(.*\) elapsed.*/\1/')
                 remaining=$(cat ${tmpOutputFile} | tail -n 2 | grep --line-buffered 'remaining' | sed -e 's/.* (\(.*\) remaining.*/\1/')
-                progressBar ${scanType:="No"} ${percent:=0} ${elapsed:="0:00:00"} ${remaining:="0:00:00"}
+                progressBar ${scanType:-"No"} ${percent:-0} ${elapsed:-"0:00:00"} ${remaining:-"0:00:00"}
+                sleep $refreshRate
         done
         echo -e "\033[0K\r\n\033[0K\r"
         if [[ -e $outputFile ]]; then cat $outputFile | sed -n '/PORT.*STATE.*SERVICE/,/Nmap done at.*/p' | head -n-2; else cat $tmpOutputFile; fi
@@ -214,7 +217,7 @@ basicScan() {
         if [ -z $(echo "${basicPorts}") ]; then
                 echo -e "${YELLOW}No ports in quick scan.. Skipping!"
         else
-                nmapProgressBar "$nmapType -sCV -p$(echo ${basicPorts}) -oN nmap/Basic_${HOST}.nmap ${HOST} ${DNSSTRING}"
+                nmapProgressBar "$nmapType -sCV -p$(echo ${basicPorts}) -oN nmap/Basic_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
         fi
 
         if [ -f nmap/Basic_"${HOST}".nmap ] && [[ ! -z $(cat nmap/Basic_"${HOST}".nmap | grep -w "Service Info: OS:") ]]; then
@@ -242,7 +245,7 @@ UDPScan() {
                 sudo -v
         fi
 
-        nmapProgressBar "sudo $nmapType -sU --max-retries 1 --open -oN nmap/UDP_${HOST}.nmap ${HOST} ${DNSSTRING}"
+        nmapProgressBar "sudo $nmapType -sU --max-retries 1 --open -oN nmap/UDP_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
         assignPorts "${HOST}"
 
         if [ ! -z $(echo "${udpPorts}") ]; then
@@ -251,9 +254,9 @@ UDPScan() {
                 echo -e "${YELLOW}Making a script scan on UDP ports: $(echo "${udpPorts}" | sed 's/,/, /g')"
                 echo -e "${NC}"
                 if [ -f /usr/share/nmap/scripts/vulners.nse ]; then
-                        nmapProgressBar "$nmapType -sCVU --script vulners --script-args mincvss=7.0 -p$(echo ${udpPorts}) -oN nmap/UDP_${HOST}.nmap ${HOST} ${DNSSTRING}"
+                        nmapProgressBar "$nmapType -sCVU --script vulners --script-args mincvss=7.0 -p$(echo ${udpPorts}) -oN nmap/UDP_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                 else
-                        nmapProgressBar "$nmapType -sCVU -p$(echo ${udpPorts}) -oN nmap/UDP_${HOST}.nmap ${HOST} ${DNSSTRING}"
+                        nmapProgressBar "$nmapType -sCVU -p$(echo ${udpPorts}) -oN nmap/UDP_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                 fi
         fi
 
@@ -266,7 +269,7 @@ fullScan() {
         echo -e "${GREEN}---------------------Starting Nmap Full Scan----------------------"
         echo -e "${NC}"
 
-        nmapProgressBar "$nmapType -p- --max-retries 1 --max-rate 500 --max-scan-delay 20 -T4 -v -oN nmap/Full_${HOST}.nmap ${HOST} ${DNSSTRING}"
+        nmapProgressBar "$nmapType -p- --max-retries 1 --max-rate 500 --max-scan-delay 20 -T4 -v -oN nmap/Full_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
         assignPorts "${HOST}"
 
         if [ -z $(echo "${basicPorts}") ]; then
@@ -274,7 +277,7 @@ fullScan() {
                 echo ""
                 echo -e "${YELLOW}Making a script scan on all ports"
                 echo -e "${NC}"
-                nmapProgressBar "$nmapType -sCV -p$(echo ${allPorts}) -oN nmap/Full_${HOST}.nmap ${HOST} ${DNSSTRING}"
+                nmapProgressBar "$nmapType -sCV -p$(echo ${allPorts}) -oN nmap/Full_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                 assignPorts "${HOST}"
         else
                 cmpPorts "${HOST}"
@@ -290,7 +293,7 @@ fullScan() {
                         echo ""
                         echo -e "${YELLOW}Making a script scan on extra ports: $(echo "${extraPorts}" | sed 's/,/, /g')"
                         echo -e "${NC}"
-                        nmapProgressBar "$nmapType -sCV -p$(echo ${extraPorts}) -oN nmap/Full_${HOST}.nmap ${HOST} ${DNSSTRING}"
+                        nmapProgressBar "$nmapType -sCV -p$(echo ${extraPorts}) -oN nmap/Full_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                         assignPorts "${HOST}"
                 fi
         fi
@@ -321,14 +324,14 @@ vulnsScan() {
         else
                 echo -e "${YELLOW}Running CVE scan on $portType ports"
                 echo -e "${NC}"
-                nmapProgressBar "$nmapType -sV --script vulners --script-args mincvss=7.0 -p$(echo ${ports}) -oN nmap/CVEs_${HOST}.nmap ${HOST} ${DNSSTRING}"
+                nmapProgressBar "$nmapType -sV --script vulners --script-args mincvss=7.0 -p$(echo ${ports}) -oN nmap/CVEs_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
                 echo ""
         fi
 
         echo ""
         echo -e "${YELLOW}Running Vuln scan on $portType ports"
         echo -e "${NC}"
-        nmapProgressBar "$nmapType -sV --script vuln -p$(echo ${ports}) -oN nmap/Vulns_${HOST}.nmap ${HOST} ${DNSSTRING}"
+        nmapProgressBar "$nmapType -sV --script vuln -p$(echo ${ports}) -oN nmap/Vulns_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
         echo -e ""
         echo -e ""
         echo -e ""
