@@ -89,6 +89,7 @@ Scan Types:
 - [x] ~~Support DNS resolution "use of urls/domains instead of IPs"~~ - Done, thanks @KatsuragiCSL
 - [x] ~~Properly identify url extensions "testing index extensions for code 200"~~
 - [x] ~~Add an nmap progress bar~~
+- [x] List missing tools in the usage menu
 
 
 ## Add more recon options
