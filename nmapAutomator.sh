@@ -126,7 +126,7 @@ assignPorts() {
 
 checkPing() {
         pingTest=$(ping -c 1 -W 3 "${HOST}" | grep ttl)
-        if [ -z $pingTest ]; then
+        if [ -z "$pingTest" ]; then
                 echo "nmap -Pn"
         else
                 echo "nmap"
@@ -141,10 +141,10 @@ checkPing() {
 
 checkOS() {
         case "$1" in
-                25[456]) echo "OpenBSD/Cisco/Oracle";;
-                 12[78]) echo "Windows"             ;;
-                  6[34]) echo "Linux"               ;;
-                      *) echo "Unknown OS!"         ;;
+        25[456]) echo "OpenBSD/Cisco/Oracle" ;;
+        12[78]) echo "Windows" ;;
+        6[34]) echo "Linux" ;;
+        *) echo "Unknown OS!" ;;
         esac
 }
 
@@ -159,7 +159,7 @@ cmpPorts() {
                 fi
         done
 
-        extraPorts=$(tr "\n" "," < nmap/cmpPorts_"${HOST}".txt | head -c-1)
+        extraPorts=$(tr "\n" "," <nmap/cmpPorts_"${HOST}".txt | head -c-1)
         rm nmap/cmpPorts_"${HOST}".txt
         IFS=$oldIFS
 }
@@ -335,7 +335,7 @@ vulnsScan() {
 
         echo ""
         echo -e "${YELLOW}Running Vuln scan on $portType ports"
-        echo -e "${YELLOW}This may take a while, depending on number of detected services.."
+        echo -e "${YELLOW}This may take a while, depending on the number of detected services.."
         echo -e "${NC}"
         nmapProgressBar "$nmapType -sV --script vuln -p${ports} -oN nmap/Vulns_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
         echo -e ""
@@ -420,10 +420,10 @@ reconRecommend() {
                                 echo "nikto -host $urlType${HOST}:$port | tee recon/nikto_${HOST}_$port.txt"
                         fi
                         if type ffuf | grep -q bin; then
-                                extensions=$(echo 'index' >./index && ffuf -s -w ./index:FUZZ -mc '200' -e '.asp,.aspx,.html,.jsp,.php' -u $urlType${HOST}:$port/FUZZ 2>/dev/null | awk -F 'index' {'print $2'} | tr '\n' ',' | head -c-1 && rm ./index)
+                                extensions=$(echo 'index' >./index && ffuf -s -w ./index:FUZZ -mc '200,302' -e '.asp,.aspx,.html,.jsp,.php' -u $urlType${HOST}:$port/FUZZ 2>/dev/null | awk -F 'index' {'print $2'} | tr '\n' ',' | head -c-1 && rm ./index)
                                 echo "ffuf -ic -w /usr/share/wordlists/dirb/common.txt -e '$extensions' -u $urlType${HOST}:$port/FUZZ | tee recon/ffuf_${HOST}_$port.txt"
                         else
-                                extensions=$(echo 'index' >./index && gobuster dir -w ./index -t 30 -qnkx '.asp,.aspx,.html,.jsp,.php' -s '200' -u $urlType${HOST}:$port 2>/dev/null | awk -F 'index' {'print $2'} | tr '\n' ',' | head -c-1 && rm ./index)
+                                extensions=$(echo 'index' >./index && gobuster dir -w ./index -t 30 -qnkx '.asp,.aspx,.html,.jsp,.php' -s '200,302' -u $urlType${HOST}:$port 2>/dev/null | awk -F 'index' {'print $2'} | tr '\n' ',' | head -c-1 && rm ./index)
                                 echo "gobuster dir -w /usr/share/wordlists/dirb/common.txt -t 30 -elkx '$extensions' -u $urlType${HOST}:$port -o recon/gobuster_${HOST}_$port.txt"
                         fi
                         echo ""
@@ -571,12 +571,12 @@ footer() {
         echo -e "${NC}"
         echo -e ""
 
-        if $((SECONDS > 3600)); then
+        if (($SECONDS > 3600)); then
                 let "hours=SECONDS/3600"
                 let "minutes=(SECONDS%3600)/60"
                 let "seconds=(SECONDS%3600)%60"
                 echo -e "${YELLOW}Completed in $hours hour(s), $minutes minute(s) and $seconds second(s)"
-        elif $((SECONDS > 60)); then
+        elif (($SECONDS > 60)); then
                 let "minutes=(SECONDS%3600)/60"
                 let "seconds=(SECONDS%3600)%60"
                 echo -e "${YELLOW}Completed in $minutes minute(s) and $seconds second(s)"
@@ -609,30 +609,30 @@ if [[ "${TYPE}" =~ ^(Quick|Basic|UDP|Full|Vulns|Recon|All|quick|basic|udp|full|v
         header "${HOST}" "${TYPE}"
 
         case "${TYPE}" in
-                Quick | quick) quickScan "${HOST}" ;;
-                Basic | basic)
-                        [ ! -f nmap/Quick_"${HOST}".nmap ] && quickScan "${HOST}"
-                        basicScan "${HOST}"
-                        ;;
-                UDP | udp) UDPScan "${HOST}" ;;
-                Full | full) fullScan "${HOST}" ;;
-                Vulns | vulns)
-                        [ ! -f nmap/Quick_"${HOST}".nmap ] && quickScan "${HOST}"
-                        vulnsScan "${HOST}"
-                        ;;
-                Recon | recon)
-                        [ ! -f nmap/Quick_"${HOST}".nmap ] && quickScan "${HOST}"
-                        [ ! -f nmap/Basic_"${HOST}".nmap ] && basicScan "${HOST}"
-                        recon "${HOST}"
-                        ;;
-                All | all)
-                        quickScan "${HOST}"
-                        basicScan "${HOST}"
-                        UDPScan "${HOST}"
-                        fullScan "${HOST}"
-                        vulnsScan "${HOST}"
-                        recon "${HOST}"
-                        ;;
+        Quick | quick) quickScan "${HOST}" ;;
+        Basic | basic)
+                [ ! -f nmap/Quick_"${HOST}".nmap ] && quickScan "${HOST}"
+                basicScan "${HOST}"
+                ;;
+        UDP | udp) UDPScan "${HOST}" ;;
+        Full | full) fullScan "${HOST}" ;;
+        Vulns | vulns)
+                [ ! -f nmap/Quick_"${HOST}".nmap ] && quickScan "${HOST}"
+                vulnsScan "${HOST}"
+                ;;
+        Recon | recon)
+                [ ! -f nmap/Quick_"${HOST}".nmap ] && quickScan "${HOST}"
+                [ ! -f nmap/Basic_"${HOST}".nmap ] && basicScan "${HOST}"
+                recon "${HOST}"
+                ;;
+        All | all)
+                quickScan "${HOST}"
+                basicScan "${HOST}"
+                UDPScan "${HOST}"
+                fullScan "${HOST}"
+                vulnsScan "${HOST}"
+                recon "${HOST}"
+                ;;
         esac
 
         footer
