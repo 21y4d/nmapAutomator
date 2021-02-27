@@ -140,15 +140,12 @@ checkPing() {
 }
 
 checkOS() {
-        if [ "$1" = 256 ] || [ "$1" = 255 ] || [ "$1" = 254 ]; then
-                echo "OpenBSD/Cisco/Oracle"
-        elif [ "$1" = 128 ] || [ "$1" = 127 ]; then
-                echo "Windows"
-        elif [ "$1" = 64 ] || [ "$1" = 63 ]; then
-                echo "Linux"
-        else
-                echo "Unknown OS!"
-        fi
+        case "$1" in
+                25[456]) echo "OpenBSD/Cisco/Oracle";;
+                 12[78]) echo "Windows"             ;;
+                  6[34]) echo "Linux"               ;;
+                      *) echo "Unknown OS!"         ;;
+        esac
 }
 
 cmpPorts() {
@@ -616,30 +613,30 @@ if [[ "${TYPE}" =~ ^(Quick|Basic|UDP|Full|Vulns|Recon|All|quick|basic|udp|full|v
         header "${HOST}" "${TYPE}"
 
         case "${TYPE}" in
-        Quick | quick) quickScan "${HOST}" ;;
-        Basic | basic)
-                if [ ! -f nmap/Quick_"${HOST}".nmap ]; then quickScan "${HOST}"; fi
-                basicScan "${HOST}"
-                ;;
-        UDP | udp) UDPScan "${HOST}" ;;
-        Full | full) fullScan "${HOST}" ;;
-        Vulns | vulns)
-                if [ ! -f nmap/Quick_"${HOST}".nmap ]; then quickScan "${HOST}"; fi
-                vulnsScan "${HOST}"
-                ;;
-        Recon | recon)
-                if [ ! -f nmap/Quick_"${HOST}".nmap ]; then quickScan "${HOST}"; fi
-                if [ ! -f nmap/Basic_"${HOST}".nmap ]; then basicScan "${HOST}"; fi
-                recon "${HOST}"
-                ;;
-        All | all)
-                quickScan "${HOST}"
-                basicScan "${HOST}"
-                UDPScan "${HOST}"
-                fullScan "${HOST}"
-                vulnsScan "${HOST}"
-                recon "${HOST}"
-                ;;
+                Quick | quick) quickScan "${HOST}" ;;
+                Basic | basic)
+                        [ ! -f nmap/Quick_"${HOST}".nmap ] && quickScan "${HOST}"
+                        basicScan "${HOST}"
+                        ;;
+                UDP | udp) UDPScan "${HOST}" ;;
+                Full | full) fullScan "${HOST}" ;;
+                Vulns | vulns)
+                        [ ! -f nmap/Quick_"${HOST}".nmap ] && quickScan "${HOST}"
+                        vulnsScan "${HOST}"
+                        ;;
+                Recon | recon)
+                        [ ! -f nmap/Quick_"${HOST}".nmap ] && quickScan "${HOST}"
+                        [ ! -f nmap/Basic_"${HOST}".nmap ] && basicScan "${HOST}"
+                        recon "${HOST}"
+                        ;;
+                All | all)
+                        quickScan "${HOST}"
+                        basicScan "${HOST}"
+                        UDPScan "${HOST}"
+                        fullScan "${HOST}"
+                        vulnsScan "${HOST}"
+                        recon "${HOST}"
+                        ;;
         esac
 
         footer
