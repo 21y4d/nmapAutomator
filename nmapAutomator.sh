@@ -531,9 +531,7 @@ runRecon() {
         oldIFS=$IFS
         IFS=$'\n'
 
-        if [ ! -d recon/ ]; then
-                mkdir recon/
-        fi
+        mkdir -p recon/
 
         if [ "$2" = "All" ]; then
                 reconCommands=$(grep "${HOST}" nmap/Recon_"${HOST}".nmap | grep -v odat)
@@ -598,15 +596,11 @@ else
 fi
 
 if [[ "${TYPE}" =~ ^(Quick|Basic|UDP|Full|Vulns|Recon|All|quick|basic|udp|full|vulns|recon|all)$ ]]; then
-        if [ ! -d ${HOST} ]; then
-                mkdir "${HOST}"
-        fi
+        mkdir -p "${HOST}"
 
         cd "${HOST}" || exit
 
-        if [ ! -d nmap/ ]; then
-                mkdir nmap/
-        fi
+        mkdir -p nmap/
 
         assignPorts "${HOST}"
 
