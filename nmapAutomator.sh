@@ -105,19 +105,19 @@ header() {
 
 assignPorts() {
         if [ -f nmap/Quick_${HOST}.nmap ]; then
-                basicPorts=$(cat nmap/Quick_${HOST}.nmap | grep open | cut -d " " -f 1 | cut -d "/" -f 1 | tr "\n" "," | cut -c3- | head -c-2)
+                basicPorts=$(grep open nmap/Quick_${HOST}.nmap | cut -d " " -f 1 | cut -d "/" -f 1 | tr "\n" "," | cut -c3- | head -c-2)
         fi
 
         if [ -f nmap/Full_${HOST}.nmap ]; then
                 if [ -f nmap/Quick_${HOST}.nmap ]; then
                         allPorts=$(cat nmap/Quick_"${HOST}".nmap nmap/Full_"${HOST}".nmap | grep open | cut -d " " -f 1 | cut -d "/" -f 1 | tr "\n" "," | cut -c3- | head -c-1)
                 else
-                        allPorts=$(cat nmap/Full_"${HOST}".nmap | grep open | cut -d " " -f 1 | cut -d "/" -f 1 | tr "\n" "," | head -c-1)
+                        allPorts=$(grep open nmap/Full_"${HOST}".nmap | cut -d " " -f 1 | cut -d "/" -f 1 | tr "\n" "," | head -c-1)
                 fi
         fi
 
         if [ -f nmap/UDP_"${HOST}".nmap ]; then
-                udpPorts=$(cat nmap/UDP_"${HOST}".nmap | grep -w "open " | cut -d " " -f 1 | cut -d "/" -f 1 | tr "\n" "," | cut -c3- | head -c-2)
+                udpPorts=$(grep -w "open " nmap/UDP_"${HOST}".nmap | cut -d " " -f 1 | cut -d "/" -f 1 | tr "\n" "," | cut -c3- | head -c-2)
                 if [[ "$udpPorts" == "Al" ]]; then
                         udpPorts=""
                 fi
@@ -164,7 +164,7 @@ cmpPorts() {
                 fi
         done
 
-        extraPorts=$(cat nmap/cmpPorts_"${HOST}".txt | tr "\n" "," | head -c-1)
+        extraPorts=$(tr "\n" "," < nmap/cmpPorts_"${HOST}".txt | head -c-1)
         rm nmap/cmpPorts_"${HOST}".txt
         IFS=$oldIFS
 }
@@ -186,15 +186,15 @@ nmapProgressBar() {
         ${1} --stats-every ${refreshRate}"s" >${tmpOutputFile} 2>&1 &
 
         while [[ (! -e $outputFile || -z $(grep "Nmap done at" $outputFile)) && (! -e $tmpOutputFile || -z $(grep -i "quitting" $tmpOutputFile)) ]]; do
-                scanType=$(cat ${tmpOutputFile} | tail -n 2 | grep --line-buffered 'elapsed' | sed -e 's/.*undergoing \(.*\) Scan.*/\1/')
-                percent=$(cat ${tmpOutputFile} | tail -n 2 | grep --line-buffered '% done' | sed -e 's/.*About \(.*\)\..*% done.*/\1/')
-                elapsed=$(cat ${tmpOutputFile} | tail -n 2 | grep --line-buffered 'elapsed' | sed -e 's/Stats: \(.*\) elapsed.*/\1/')
-                remaining=$(cat ${tmpOutputFile} | tail -n 2 | grep --line-buffered 'remaining' | sed -e 's/.* (\(.*\) remaining.*/\1/')
+                scanType=$(tail -n 2 ${tmpOutputFile} | grep --line-buffered 'elapsed' | sed -e 's/.*undergoing \(.*\) Scan.*/\1/')
+                percent=$(tail -n 2 ${tmpOutputFile} | grep --line-buffered '% done' | sed -e 's/.*About \(.*\)\..*% done.*/\1/')
+                elapsed=$(tail -n 2 ${tmpOutputFile} | grep --line-buffered 'elapsed' | sed -e 's/Stats: \(.*\) elapsed.*/\1/')
+                remaining=$(tail -n 2 ${tmpOutputFile} | grep --line-buffered 'remaining' | sed -e 's/.* (\(.*\) remaining.*/\1/')
                 progressBar ${scanType:-"No"} ${percent:-0} ${elapsed:-"0:00:00"} ${remaining:-"0:00:00"}
                 sleep $refreshRate
         done
         echo -e "\033[0K\r\n\033[0K\r"
-        if [[ -e $outputFile ]]; then cat $outputFile | sed -n '/PORT.*STATE.*SERVICE/,/Nmap done at.*/p' | head -n-2; else cat $tmpOutputFile; fi
+        if [[ -e $outputFile ]]; then sed -n '/PORT.*STATE.*SERVICE/,/Nmap done at.*/p' $outputFile | head -n-2; else cat $tmpOutputFile; fi
         rm $tmpOutputFile
 }
 
@@ -220,8 +220,8 @@ basicScan() {
                 nmapProgressBar "$nmapType -sCV -p$(echo ${basicPorts}) -oN nmap/Basic_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
         fi
 
-        if [ -f nmap/Basic_"${HOST}".nmap ] && [[ ! -z $(cat nmap/Basic_"${HOST}".nmap | grep -w "Service Info: OS:") ]]; then
-                serviceOS=$(cat nmap/Basic_"${HOST}".nmap | grep -w "Service Info: OS:" | cut -d ":" -f 3 | cut -c2- | cut -d ";" -f 1 | head -c-1)
+        if [ -f nmap/Basic_"${HOST}".nmap ] && [[ ! -z $(grep -w "Service Info: OS:" nmap/Basic_"${HOST}".nmap) ]]; then
+                serviceOS=$(grep -w "Service Info: OS:" nmap/Basic_"${HOST}".nmap | cut -d ":" -f 3 | cut -c2- | cut -d ";" -f 1 | head -c-1)
                 if [[ "$osType" != "$serviceOS" ]]; then
                         osType=$(echo "${serviceOS}")
                         echo -e "${NC}"
@@ -341,7 +341,7 @@ recon() {
 
         reconRecommend "${HOST}" | tee nmap/Recon_"${HOST}".nmap
 
-        availableRecon=$(cat nmap/Recon_"${HOST}".nmap | grep "${HOST}" | cut -d " " -f 1 | sed 's/.\///g; s/.py//g; s/cd/odat/g;' | sort -u | tr "\n" "," | sed 's/,/,\ /g' | head -c-2)
+        availableRecon=$(grep "${HOST}" nmap/Recon_"${HOST}".nmap | cut -d " " -f 1 | sed 's/.\///g; s/.py//g; s/cd/odat/g;' | sort -u | tr "\n" "," | sed 's/,/,\ /g' | head -c-2)
 
         secs=30
         count=0
@@ -395,10 +395,10 @@ reconRecommend() {
                 file=$(cat nmap/Quick_"${HOST}".nmap nmap/Full_"${HOST}".nmap | grep -w "open")
         elif [ -f nmap/Basic_"${HOST}".nmap ]; then
                 ports=$(echo "${basicPorts}")
-                file=$(cat nmap/Basic_"${HOST}".nmap | grep -w "open")
+                file=$(grep -w "open" nmap/Basic_"${HOST}".nmap)
         else
                 ports=$(echo "${basicPorts}")
-                file=$(cat nmap/Quick_"${HOST}".nmap | grep -w "open")
+                file=$(grep -w "open" nmap/Quick_"${HOST}".nmap)
 
         fi
 
@@ -431,10 +431,10 @@ reconRecommend() {
         done
 
         if [ -f nmap/Basic_"${HOST}".nmap ]; then
-                cms=$(cat nmap/Basic_"${HOST}".nmap | grep http-generator | cut -d " " -f 2)
+                cms=$(grep http-generator nmap/Basic_"${HOST}".nmap | cut -d " " -f 2)
                 if [ ! -z $(echo "${cms}") ]; then
                         for line in $cms; do
-                                port=$(cat nmap/Basic_"${HOST}".nmap | grep "$line" -B1 | grep -w "open" | cut -d "/" -f 1)
+                                port=$(grep "$line" -B1 nmap/Basic_"${HOST}".nmap | grep -w "open" | cut -d "/" -f 1)
                                 if [[ "$cms" =~ ^(Joomla|WordPress|Drupal)$ ]]; then
                                         echo -e "${NC}"
                                         echo -e "${YELLOW}CMS Recon:"
@@ -478,7 +478,7 @@ reconRecommend() {
                 echo ""
         fi
 
-        if [ -f nmap/UDP_"${HOST}".nmap ] && [[ ! -z $(cat nmap/UDP_"${HOST}".nmap | grep open | grep -w "161/udp") ]]; then
+        if [ -f nmap/UDP_"${HOST}".nmap ] && [[ ! -z $(grep open nmap/UDP_"${HOST}".nmap | grep -w "161/udp") ]]; then
                 echo -e "${NC}"
                 echo -e "${YELLOW}SNMP Recon:"
                 echo -e "${NC}"
@@ -503,8 +503,8 @@ reconRecommend() {
                 echo -e "${YELLOW}ldap Recon:"
                 echo -e "${NC}"
                 echo "ldapsearch -x -h ${HOST} -s base | tee recon/ldapsearch_${HOST}.txt"
-                echo "ldapsearch -x -h ${HOST} -b \$(cat recon/ldapsearch_${HOST}.txt | grep rootDomainNamingContext | cut -d ' ' -f2) | tee recon/ldapsearch_DC_${HOST}.txt"
-                echo "nmap -Pn -p 389 --script ldap-search --script-args 'ldap.username=\"\$(cat recon/ldapsearch_${HOST}.txt | grep rootDomainNamingContext | cut -d \\" \\" -f2)\"' ${HOST} -oN recon/nmap_ldap_${HOST}.txt"
+                echo "ldapsearch -x -h ${HOST} -b \$(grep rootDomainNamingContext recon/ldapsearch_${HOST}.txt | cut -d ' ' -f2) | tee recon/ldapsearch_DC_${HOST}.txt"
+                echo "nmap -Pn -p 389 --script ldap-search --script-args 'ldap.username=\"\$(grep rootDomainNamingContext recon/ldapsearch_${HOST}.txt | cut -d \\" \\" -f2)\"' ${HOST} -oN recon/nmap_ldap_${HOST}.txt"
                 echo ""
         fi
 
@@ -541,9 +541,9 @@ runRecon() {
         fi
 
         if [ "$2" == "All" ]; then
-                reconCommands=$(cat nmap/Recon_"${HOST}".nmap | grep "${HOST}" | grep -v odat)
+                reconCommands=$(grep "${HOST}" nmap/Recon_"${HOST}".nmap | grep -v odat)
         else
-                reconCommands=$(cat nmap/Recon_"${HOST}".nmap | grep "${HOST}" | grep "$2")
+                reconCommands=$(grep "${HOST}" nmap/Recon_"${HOST}".nmap | grep "$2")
         fi
 
         for line in $(echo "${reconCommands}"); do
