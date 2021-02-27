@@ -193,12 +193,12 @@ nmapProgressBar() {
                 sleep $refreshRate
         done
         echo -e "\033[0K\r\n\033[0K\r"
-        if [ -e $tmpOutputFile ]; then rm $tmpOutputFile; fi
         if [ -e $outputFile ]; then
                 sed -n '/PORT.*STATE.*SERVICE/,/Nmap done at.*/p' $outputFile | head -n-2
         else
                 cat $tmpOutputFile
         fi
+        rm -f $tmpOutputFile
 }
 
 quickScan() {
