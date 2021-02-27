@@ -286,14 +286,13 @@ fullScan() {
                         echo ""
                         allPorts=""
                         echo -e "${YELLOW}No new ports"
-                        rm nmap/Full_"${HOST}".nmap
                         echo -e "${NC}"
                 else
                         echo ""
                         echo ""
                         echo -e "${YELLOW}Making a script scan on extra ports: $(echo "${extraPorts}" | sed 's/,/, /g')"
                         echo -e "${NC}"
-                        nmapProgressBar "$nmapType -sCV -p$(echo ${extraPorts}) -oN nmap/Full_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
+                        nmapProgressBar "$nmapType -sCV -p$(echo ${extraPorts}) -oN nmap/Full_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                         assignPorts "${HOST}"
                 fi
         fi
