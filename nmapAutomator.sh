@@ -117,7 +117,7 @@ assignPorts() {
         fi
 
         if [ -f nmap/UDP_"${HOST}".nmap ]; then
-                udpPorts=$(grep -w "open " nmap/UDP_"${HOST}".nmap | cut -d " " -f 1 | cut -d "/" -f 1 | tr "\n" "," | cut -c3- | head -c-2)
+                udpPorts=$(grep "open " nmap/UDP_"${HOST}".nmap | cut -d " " -f 1 | cut -d "/" -f 1 | tr "\n" "," | cut -c3- | head -c-2)
                 if [ "$udpPorts" = "Al" ]; then
                         udpPorts=""
                 fi
@@ -220,8 +220,8 @@ basicScan() {
                 nmapProgressBar "$nmapType -sCV -p$(echo ${basicPorts}) -oN nmap/Basic_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
         fi
 
-        if [ -f nmap/Basic_"${HOST}".nmap ] && grep -q -w "Service Info: OS:" nmap/Basic_"${HOST}".nmap; then
-                serviceOS=$(grep -w "Service Info: OS:" nmap/Basic_"${HOST}".nmap | cut -d ":" -f 3 | cut -c2- | cut -d ";" -f 1 | head -c-1)
+        if [ -f nmap/Basic_"${HOST}".nmap ] && grep -q "Service Info: OS:" nmap/Basic_"${HOST}".nmap; then
+                serviceOS=$(grep "Service Info: OS:" nmap/Basic_"${HOST}".nmap | cut -d ":" -f 3 | cut -c2- | cut -d ";" -f 1 | head -c-1)
                 if [ "$osType" != "$serviceOS" ]; then
                         osType=$(echo "${serviceOS}")
                         echo -e "${NC}"
@@ -394,10 +394,10 @@ reconRecommend() {
 
         if [ -f nmap/Full_Extra_"${HOST}".nmap ]; then
                 ports=$(echo "${allPorts}")
-                file=$(cat nmap/Basic_"${HOST}".nmap nmap/Full_Extra_"${HOST}".nmap | grep -w "open" | sort -u)
+                file=$(cat nmap/Basic_"${HOST}".nmap nmap/Full_Extra_"${HOST}".nmap | grep "open" | sort -u)
         else
                 ports=$(echo "${basicPorts}")
-                file=$(grep -w "open" nmap/Basic_"${HOST}".nmap)
+                file=$(grep "open" nmap/Basic_"${HOST}".nmap)
 
         fi
 
@@ -433,7 +433,7 @@ reconRecommend() {
                 cms=$(grep http-generator nmap/Basic_"${HOST}".nmap | cut -d " " -f 2)
                 if [ -n "${cms}" ]; then
                         for line in $cms; do
-                                port=$(grep "$line" -B1 nmap/Basic_"${HOST}".nmap | grep -w "open" | cut -d "/" -f 1)
+                                port=$(grep "$line" -B1 nmap/Basic_"${HOST}".nmap | grep "open" | cut -d "/" -f 1)
                                 if [[ "$cms" =~ ^(Joomla|WordPress|Drupal)$ ]]; then
                                         echo -e "${NC}"
                                         echo -e "${YELLOW}CMS Recon:"
@@ -448,7 +448,7 @@ reconRecommend() {
                 fi
         fi
 
-        if echo "${file}" | grep -w -q "25/tcp"; then
+        if echo "${file}" | grep -q "25/tcp"; then
                 echo -e "${NC}"
                 echo -e "${YELLOW}SMTP Recon:"
                 echo -e "${NC}"
@@ -456,7 +456,7 @@ reconRecommend() {
                 echo ""
         fi
 
-        if echo "${file}" | grep -w -q "445/tcp"; then
+        if echo "${file}" | grep -q "445/tcp"; then
                 echo -e "${NC}"
                 echo -e "${YELLOW}SMB Recon:"
                 echo -e "${NC}"
@@ -468,7 +468,7 @@ reconRecommend() {
                         echo "enum4linux -a ${HOST} | tee recon/enum4linux_${HOST}.txt"
                 fi
                 echo ""
-        elif echo "${file}" | grep -w -q "139/tcp" && [ $osType = "Linux" ]; then
+        elif echo "${file}" | grep -q "139/tcp" && [ $osType = "Linux" ]; then
                 echo -e "${NC}"
                 echo -e "${YELLOW}SMB Recon:"
                 echo -e "${NC}"
@@ -476,7 +476,7 @@ reconRecommend() {
                 echo ""
         fi
 
-        if [ -f nmap/UDP_"${HOST}".nmap ] && grep -w -q "161/udp.*open" nmap/UDP_"${HOST}".nmap; then
+        if [ -f nmap/UDP_"${HOST}".nmap ] && grep -q "161/udp.*open" nmap/UDP_"${HOST}".nmap; then
                 echo -e "${NC}"
                 echo -e "${YELLOW}SNMP Recon:"
                 echo -e "${NC}"
@@ -485,7 +485,7 @@ reconRecommend() {
                 echo ""
         fi
 
-        if echo "${file}" | grep -w -q "53/tcp"; then
+        if echo "${file}" | grep -q "53/tcp"; then
                 echo -e "${NC}"
                 echo -e "${YELLOW}DNS Recon:"
                 echo -e "${NC}"
@@ -496,7 +496,7 @@ reconRecommend() {
                 echo ""
         fi
 
-        if echo "${file}" | grep -w -q "389/tcp"; then
+        if echo "${file}" | grep -q "389/tcp"; then
                 echo -e "${NC}"
                 echo -e "${YELLOW}ldap Recon:"
                 echo -e "${NC}"
@@ -506,7 +506,7 @@ reconRecommend() {
                 echo ""
         fi
 
-        if echo "${file}" | grep -w -q "1521/tcp"; then
+        if echo "${file}" | grep -q "1521/tcp"; then
                 echo -e "${NC}"
                 echo -e "${YELLOW}Oracle Recon \"Exc. from Default\":"
                 echo -e "${NC}"
