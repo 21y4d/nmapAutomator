@@ -154,9 +154,7 @@ cmpPorts() {
         touch nmap/cmpPorts_"${HOST}".txt
 
         for i in ${allPorts}; do
-                if [[ "$i" =~ ^($(echo "${basicPorts}" | sed 's/,/\|/g'))$ ]]; then
-                        :
-                else
+                if ! [[ "$i" =~ ^($(echo "${basicPorts}" | sed 's/,/\|/g'))$ ]]; then
                         echo -n "$i," >>nmap/cmpPorts_"${HOST}".txt
                 fi
         done
@@ -592,9 +590,7 @@ if [ -z "${TYPE}" ] || [ -z "${HOST}" ]; then
         usage
 fi
 
-if [[ ${HOST} =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ ${HOST} =~ ^([A-Za-z0-9-]{1,63}\.)+[A-Za-z]{2,6}$ ]]; then
-        :
-else
+if ! [[ ${HOST} =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! [[ ${HOST} =~ ^([A-Za-z0-9-]{1,63}\.)+[A-Za-z]{2,6}$ ]]; then
         echo -e "${RED}"
         echo -e "${RED}Invalid IP or URL!"
         echo -e "${RED}"
