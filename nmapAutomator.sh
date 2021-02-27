@@ -183,7 +183,7 @@ nmapProgressBar() {
         refreshRate=${2:-"0.5"}
         outputFile=$(echo ${1} | sed -e 's/.*-oN \(.*\).nmap.*/\1/').nmap
         tmpOutputFile=${outputFile}.tmp
-        ${1} --stats-every ${refreshRate}"s" >${tmpOutputFile} 2>&1 &
+        if [[ ! -e $outputFile ]]; then bash -c "${1} --stats-every ${refreshRate}"s" >${tmpOutputFile} 2>&1 &"; fi
 
         while [[ (! -e $outputFile || -z $(grep "Nmap done at" $outputFile)) && (! -e $tmpOutputFile || -z $(grep -i "quitting" $tmpOutputFile)) ]]; do
                 scanType=$(tail -n 2 ${tmpOutputFile} | grep --line-buffered 'elapsed' | sed -e 's/.*undergoing \(.*\) Scan.*/\1/')
@@ -195,7 +195,7 @@ nmapProgressBar() {
         done
         echo -e "\033[0K\r\n\033[0K\r"
         if [[ -e $outputFile ]]; then sed -n '/PORT.*STATE.*SERVICE/,/Nmap done at.*/p' $outputFile | head -n-2; else cat $tmpOutputFile; fi
-        rm $tmpOutputFile
+        if [[ -e $tmpOutputFile ]]; then rm $tmpOutputFile; fi
 }
 
 quickScan() {
@@ -282,7 +282,7 @@ fullScan() {
                 echo ""
                 echo -e "${YELLOW}Making a script scan on all ports"
                 echo -e "${NC}"
-                nmapProgressBar "$nmapType -sCV -p$(echo ${allPorts}) -oN nmap/Full_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
+                nmapProgressBar "$nmapType -sCV -p$(echo ${allPorts}) -oN nmap/Full_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                 assignPorts "${HOST}"
         else
                 cmpPorts "${HOST}"
@@ -334,6 +334,7 @@ vulnsScan() {
 
         echo ""
         echo -e "${YELLOW}Running Vuln scan on $portType ports"
+        echo -e "${YELLOW}This may take a while, depending on number of detected services.."
         echo -e "${NC}"
         nmapProgressBar "$nmapType -sV --script vuln -p$(echo ${ports}) -oN nmap/Vulns_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
         echo -e ""
@@ -391,18 +392,12 @@ reconRecommend() {
         oldIFS=$IFS
         IFS=$'\n'
 
-        if [ -f nmap/Full_"${HOST}".nmap ] && [ -f nmap/Basic_"${HOST}".nmap ]; then
+        if [ -f nmap/Full_Extra_"${HOST}".nmap ]; then
                 ports=$(echo "${allPorts}")
-                file=$(cat nmap/Basic_"${HOST}".nmap nmap/Full_"${HOST}".nmap | grep -w "open")
-        elif [ -f nmap/Full_"${HOST}".nmap ]; then
-                ports=$(echo "${allPorts}")
-                file=$(cat nmap/Quick_"${HOST}".nmap nmap/Full_"${HOST}".nmap | grep -w "open")
-        elif [ -f nmap/Basic_"${HOST}".nmap ]; then
-                ports=$(echo "${basicPorts}")
-                file=$(grep -w "open" nmap/Basic_"${HOST}".nmap)
+                file=$(cat nmap/Basic_"${HOST}".nmap nmap/Full_Extra_"${HOST}".nmap | grep -w "open" | sort -u)
         else
                 ports=$(echo "${basicPorts}")
-                file=$(grep -w "open" nmap/Quick_"${HOST}".nmap)
+                file=$(grep -w "open" nmap/Basic_"${HOST}".nmap)
 
         fi
 
