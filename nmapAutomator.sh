@@ -180,7 +180,9 @@ nmapProgressBar() {
         refreshRate=${2:-"0.5"}
         outputFile=$(echo ${1} | sed -e 's/.*-oN \(.*\).nmap.*/\1/').nmap
         tmpOutputFile=${outputFile}.tmp
-        if [ ! -e $outputFile ]; then bash -c "${1} --stats-every ${refreshRate}"s" >${tmpOutputFile} 2>&1 &"; fi
+        if [ ! -e $outputFile ]; then
+                ${1} --stats-every ${refreshRate}s >${tmpOutputFile} 2>&1 &
+        fi
 
         while { [ ! -e $outputFile ] || ! grep -q "Nmap done at" $outputFile; } && { [ ! -e $tmpOutputFile ] || ! grep -i -q "quitting" $tmpOutputFile; }; do
                 scanType=$(tail -n 2 ${tmpOutputFile} | grep --line-buffered 'elapsed' | sed -e 's/.*undergoing \(.*\) Scan.*/\1/')
@@ -191,8 +193,12 @@ nmapProgressBar() {
                 sleep $refreshRate
         done
         echo -e "\033[0K\r\n\033[0K\r"
-        if [ -e $outputFile ]; then sed -n '/PORT.*STATE.*SERVICE/,/Nmap done at.*/p' $outputFile | head -n-2; else cat $tmpOutputFile; fi
         if [ -e $tmpOutputFile ]; then rm $tmpOutputFile; fi
+        if [ -e $outputFile ]; then
+                sed -n '/PORT.*STATE.*SERVICE/,/Nmap done at.*/p' $outputFile | head -n-2
+        else
+                cat $tmpOutputFile
+        fi
 }
 
 quickScan() {
