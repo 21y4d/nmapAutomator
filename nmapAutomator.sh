@@ -183,10 +183,10 @@ nmapProgressBar() {
         fi
 
         while { [ ! -e $outputFile ] || ! grep -q "Nmap done at" $outputFile; } && { [ ! -e $tmpOutputFile ] || ! grep -i -q "quitting" $tmpOutputFile; }; do
-                scanType=$(tail -n 2 ${tmpOutputFile} | grep --line-buffered 'elapsed' | sed -e 's/.*undergoing \(.*\) Scan.*/\1/')
-                percent=$(tail -n 2 ${tmpOutputFile} | grep --line-buffered '% done' | sed -e 's/.*About \(.*\)\..*% done.*/\1/')
-                elapsed=$(tail -n 2 ${tmpOutputFile} | grep --line-buffered 'elapsed' | sed -e 's/Stats: \(.*\) elapsed.*/\1/')
-                remaining=$(tail -n 2 ${tmpOutputFile} | grep --line-buffered 'remaining' | sed -e 's/.* (\(.*\) remaining.*/\1/')
+                scanType=$(tail -n 2 ${tmpOutputFile} | sed -ne '/elapsed/{s/.*undergoing \(.*\) Scan.*/\1/p}')
+                percent=$(tail -n 2 ${tmpOutputFile} | sed -ne '/% done/{s/.*About \(.*\)\..*% done.*/\1/p}')
+                elapsed=$(tail -n 2 ${tmpOutputFile} | sed -ne '/elapsed/{s/Stats: \(.*\) elapsed.*/\1/p}')
+                remaining=$(tail -n 2 ${tmpOutputFile} | sed -ne '/remaining/{s/.* (\(.*\) remaining.*/\1/p}')
                 progressBar ${scanType:-"No"} ${percent:-0} ${elapsed:-"0:00:00"} ${remaining:-"0:00:00"}
                 sleep $refreshRate
         done
