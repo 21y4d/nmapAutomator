@@ -258,6 +258,11 @@ UDPScan() {
                 else
                         nmapProgressBar "$nmapType -sCVU -p$(echo ${udpPorts}) -oN nmap/UDP_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                 fi
+        else
+                echo ""
+                echo ""
+                echo -e "${YELLOW}No UDP ports are open"
+                echo -e "${NC}"
         fi
 
         echo -e ""
