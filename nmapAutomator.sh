@@ -220,7 +220,7 @@ basicScan() {
         if [ -f nmap/Basic_"${HOST}".nmap ] && grep -q "Service Info: OS:" nmap/Basic_"${HOST}".nmap; then
                 serviceOS=$(grep "Service Info: OS:" nmap/Basic_"${HOST}".nmap | cut -d ":" -f 3 | cut -c2- | cut -d ";" -f 1 | head -c-1)
                 if [ "$osType" != "$serviceOS" ]; then
-                        osType=$(echo "${serviceOS}")
+                        osType="${serviceOS}"
                         echo -e "${NC}"
                         echo -e "${NC}"
                         echo -e "${GREEN}OS Detection modified to: $osType"
@@ -294,7 +294,7 @@ fullScan() {
                         echo ""
                         echo -e "${YELLOW}Making a script scan on extra ports: $(echo "${extraPorts}" | sed 's/,/, /g')"
                         echo -e "${NC}"
-                        nmapProgressBar "$nmapType -sCV -p$(echo ${extraPorts}) -oN nmap/Full_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
+                        nmapProgressBar "$nmapType -sCV -p${extraPorts} -oN nmap/Full_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                         assignPorts "${HOST}"
                 fi
         fi
@@ -310,10 +310,10 @@ vulnsScan() {
 
         if [ -z "${allPorts}" ]; then
                 portType="basic"
-                ports=$(echo "${basicPorts}")
+                ports="${basicPorts}"
         else
                 portType="all"
-                ports=$(echo "${allPorts}")
+                ports="${allPorts}"
         fi
 
         if [ ! -f /usr/share/nmap/scripts/vulners.nse ]; then
@@ -325,7 +325,7 @@ vulnsScan() {
         else
                 echo -e "${YELLOW}Running CVE scan on $portType ports"
                 echo -e "${NC}"
-                nmapProgressBar "$nmapType -sV --script vulners --script-args mincvss=7.0 -p$(echo ${ports}) -oN nmap/CVEs_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
+                nmapProgressBar "$nmapType -sV --script vulners --script-args mincvss=7.0 -p${ports} -oN nmap/CVEs_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
                 echo ""
         fi
 
@@ -333,7 +333,7 @@ vulnsScan() {
         echo -e "${YELLOW}Running Vuln scan on $portType ports"
         echo -e "${YELLOW}This may take a while, depending on number of detected services.."
         echo -e "${NC}"
-        nmapProgressBar "$nmapType -sV --script vuln -p$(echo ${ports}) -oN nmap/Vulns_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
+        nmapProgressBar "$nmapType -sV --script vuln -p${ports} -oN nmap/Vulns_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
         echo -e ""
         echo -e ""
         echo -e ""
@@ -390,10 +390,10 @@ reconRecommend() {
         IFS=$'\n'
 
         if [ -f nmap/Full_Extra_"${HOST}".nmap ]; then
-                ports=$(echo "${allPorts}")
+                ports="${allPorts}"
                 file=$(cat nmap/Basic_"${HOST}".nmap nmap/Full_Extra_"${HOST}".nmap | grep "open" | sort -u)
         else
-                ports=$(echo "${basicPorts}")
+                ports="${basicPorts}"
                 file=$(grep "open" nmap/Basic_"${HOST}".nmap)
 
         fi
