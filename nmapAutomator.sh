@@ -169,8 +169,8 @@ cmpPorts() {
 progressBar() {
         [ -z "${2##*[!0-9]*}" ] && return 1
         [ $(stty size | cut -d ' ' -f 2) -le 120 ] && width=50 || width=100
-        fill=$(printf "%-$(($width == 100 ? $2 : $(($2 / 2))))s" "#")
-        empty=$(printf "%-$(($width - $(($width == 100 ? $2 : $(($2 / 2))))))s" " ")
+        fill=$(printf "%-$((width == 100 ? $2 : ($2 / 2)))s" "#")
+        empty=$(printf "%-$((width - (width == 100 ? $2 : ($2 / 2))))s" " ")
         echo -e "In progress: ${1} Scan (${3} elapsed - ${4} remaining)   "
         echo -e "[${fill// /\#}>${empty// / }] ${2}% done   "
         echo -ne "\e[2A"
@@ -355,7 +355,7 @@ recon() {
                         echo -e "${YELLOW}"
                         echo -e "Which commands would you like to run?${NC}\nAll (Default), $availableRecon, Skip <!>\n"
                         while [ ${count} -lt ${secs} ]; do
-                                tlimit=$(($secs - $count))
+                                tlimit=$((secs - count))
                                 echo -e "\rRunning Default in (${tlimit}) s: \c"
                                 read -t 1 reconCommand
                                 [ -n "$reconCommand" ] && { break; }
@@ -567,12 +567,12 @@ footer() {
         echo -e "${NC}"
         echo -e ""
 
-        if $(($SECONDS > 3600)); then
+        if $((SECONDS > 3600)); then
                 let "hours=SECONDS/3600"
                 let "minutes=(SECONDS%3600)/60"
                 let "seconds=(SECONDS%3600)%60"
                 echo -e "${YELLOW}Completed in $hours hour(s), $minutes minute(s) and $seconds second(s)"
-        elif $(($SECONDS > 60)); then
+        elif $((SECONDS > 60)); then
                 let "minutes=(SECONDS%3600)/60"
                 let "seconds=(SECONDS%3600)%60"
                 echo -e "${YELLOW}Completed in $minutes minute(s) and $seconds second(s)"
