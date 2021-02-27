@@ -364,8 +364,8 @@ recon() {
                                 tlimit=$((secs - count))
                                 echo -e "\rRunning Default in (${tlimit}) s: \c"
                                 read -t 1 reconCommand
-                                [ -n "$reconCommand" ] && { break; }
                                 count=$((count + 1))
+                                [ -n "$reconCommand" ] && break
                         done
                         if [ "$reconCommand" = "All" ] || [ -z "${reconCommand}" ]; then
                                 runRecon "${HOST}" "All"
