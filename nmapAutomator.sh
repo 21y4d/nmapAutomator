@@ -27,6 +27,11 @@ while [ $# -gt 0 ]; do
                 shift
                 shift
                 ;;
+        -o | --output)
+                OUTPUTDIR="$2"
+                shift
+                shift
+                ;;
         --default)
                 DEFAULT=YES
                 shift
@@ -55,9 +60,13 @@ else
         DNSSERVER="1.1.1.1"
 fi
 
+if [ -z "$OUTPUTDIR" ]; then
+        OUTPUTDIR="${HOST}"
+fi
+
 usage() {
         echo -e ""
-        echo -e "${RED}Usage: $0 -H/--host <TARGET-IP> -t/--type <TYPE> [-d/--dns <DNS SERVER>]"
+        echo -e "${RED}Usage: $0 -H/--host <TARGET-IP> -t/--type <TYPE> [-d/--dns <DNS SERVER> -o/--output <OUTPUT DIRECTORY>]"
         echo -e "${YELLOW}"
         echo -e "Scan Types:"
         echo -e "\tQuick: Shows all open ports quickly (~15 seconds)"
@@ -244,6 +253,7 @@ UDPScan() {
         if [ "$USER" != 'root' ]; then
                 echo "UDP needs to be run as root, running with sudo..."
                 sudo -v
+                echo ""
         fi
 
         nmapProgressBar "sudo $nmapType -sU --max-retries 1 --open -oN nmap/UDP_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
@@ -255,9 +265,9 @@ UDPScan() {
                 echo -e "${YELLOW}Making a script scan on UDP ports: $(echo "${udpPorts}" | sed 's/,/, /g')"
                 echo -e "${NC}"
                 if [ -f /usr/share/nmap/scripts/vulners.nse ]; then
-                        nmapProgressBar "$nmapType -sCVU --script vulners --script-args mincvss=7.0 -p$(echo ${udpPorts}) -oN nmap/UDP_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
+                        nmapProgressBar "$nmapType -sCVU --script vulners --script-args mincvss=7.0 -p$(echo ${udpPorts}) -oN nmap/UDP_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                 else
-                        nmapProgressBar "$nmapType -sCVU -p$(echo ${udpPorts}) -oN nmap/UDP_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
+                        nmapProgressBar "$nmapType -sCVU -p$(echo ${udpPorts}) -oN nmap/UDP_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                 fi
         else
                 echo ""
@@ -346,13 +356,27 @@ vulnsScan() {
 recon() {
 
         reconRecommend "${HOST}" | tee nmap/Recon_"${HOST}".nmap
+        allRecon=$(grep "${HOST}" nmap/Recon_"${HOST}".nmap | cut -d " " -f 1 | sort -u)
 
-        availableRecon=$(grep "${HOST}" nmap/Recon_"${HOST}".nmap | cut -d " " -f 1 | sed 's/.\///g; s/.py//g; s/cd/odat/g;' | sort -u | tr "\n" "," | sed 's/,/,\ /g' | head -c-2)
+        for tool in $allRecon; do
+                if ! type $tool 2>/dev/null | grep -q bin; then
+                        missingTools="$missingTools $tool"
+                fi
+        done
+
+        if [ -n "$missingTools" ]; then
+                echo -e "${RED}Missing tools:${NC}$missingTools"
+                echo -e "\n${RED}You can install with:"
+                echo -e "${YELLOW}sudo apt install$missingTools -y"
+                echo -e "${NC}\n"
+
+                availableRecon=$(echo $allRecon | tr " " "\n" | grep -vE $(echo $missingTools | tr " " "|") | tr "\n" "," | sed 's/,/,\ /g' | head -c-2)
+        else
+                availableRecon=$(echo $allRecon | sed 's/\ /,\ /g')
+        fi
 
         secs=30
         count=0
-
-        reconCommand=""
 
         if [ -n "$availableRecon" ]; then
                 while [ "${reconCommand}" != "!" ]; do
@@ -382,6 +406,9 @@ recon() {
                                 echo -e "${NC}"
                         fi
                 done
+        else
+                echo -e "${YELLOW}No Recon Recommendations found..."
+                echo -e "${NC}\n\n"
         fi
 
 }
@@ -477,7 +504,7 @@ reconRecommend() {
                 echo ""
         fi
 
-        if [ -f nmap/UDP_"${HOST}".nmap ] && grep -q "161/udp.*open" nmap/UDP_"${HOST}".nmap; then
+        if [ -f nmap/UDP_Extra_"${HOST}".nmap ] && grep -q "161/udp.*open" nmap/UDP_Extra_"${HOST}".nmap; then
                 echo -e "${NC}"
                 echo -e "${YELLOW}SNMP Recon:"
                 echo -e "${NC}"
@@ -509,12 +536,10 @@ reconRecommend() {
 
         if echo "${file}" | grep -q "1521/tcp"; then
                 echo -e "${NC}"
-                echo -e "${YELLOW}Oracle Recon \"Exc. from Default\":"
+                echo -e "${YELLOW}Oracle Recon:"
                 echo -e "${NC}"
-                echo "cd /opt/odat/;#${HOST};"
-                echo "./odat.py sidguesser -s ${HOST} -p 1521"
-                echo "./odat.py passwordguesser -s ${HOST} -p 1521 -d XE --accounts-file accounts/accounts-multiple.txt"
-                echo "cd -;#${HOST};"
+                echo "odat sidguesser -s ${HOST} -p 1521"
+                echo "odat passwordguesser -s ${HOST} -p 1521 -d XE --accounts-file accounts/accounts-multiple.txt"
                 echo ""
         fi
 
@@ -538,13 +563,13 @@ runRecon() {
         mkdir -p recon/
 
         if [ "$2" = "All" ]; then
-                reconCommands=$(grep "${HOST}" nmap/Recon_"${HOST}".nmap | grep -v odat)
+                reconCommands=$(grep "${HOST}" nmap/Recon_"${HOST}".nmap)
         else
                 reconCommands=$(grep "${HOST}" nmap/Recon_"${HOST}".nmap | grep "$2")
         fi
 
         for line in ${reconCommands}; do
-                currentScan=$(echo "$line" | cut -d " " -f 1 | sed 's/.\///g; s/.py//g; s/cd/odat/g;' | sort -u | tr "\n" "," | sed 's/,/,\ /g' | head -c-2)
+                currentScan=$(echo "$line" | cut -d " " -f 1 | sort -u | tr "\n" "," | sed 's/,/,\ /g' | head -c-2)
                 fileName=$(echo "${line}" | awk -F "recon/" '{print $TYPE}' | head -c-1)
                 if [ ! -z recon/$(echo "${fileName}") ] && [ ! -f recon/$(echo "${fileName}") ]; then
                         echo -e "${NC}"
@@ -598,11 +623,7 @@ if ! [[ ${HOST} =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! [[ ${HOST} =~ ^([A-Z
 fi
 
 if [[ "${TYPE}" =~ ^(Quick|Basic|UDP|Full|Vulns|Recon|All|quick|basic|udp|full|vulns|recon|all)$ ]]; then
-        mkdir -p "${HOST}"
-
-        cd "${HOST}" || exit
-
-        mkdir -p nmap/
+        mkdir -p "${OUTPUTDIR}" && cd "${OUTPUTDIR}" && mkdir -p nmap/ || usage
 
         assignPorts "${HOST}"
 
