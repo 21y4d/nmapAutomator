@@ -91,14 +91,15 @@ The entire script output is also saved, which you can view with `less -r outputD
 
 ------
 
-## TODO features list
+## TODO list
 **Feel free to send your pull requests :)**
-- [x] ~~Support DNS resolution "use of urls/domains instead of IPs"~~ - Done, thanks @KatsuragiCSL
-- [x] ~~Properly identify url extensions "testing index extensions for code 200"~~
-- [x] ~~Add an nmap progress bar~~
-- [x] ~~List missing tools in recon~~
-- [x] ~~Add option to change output folder~~
-- [x] ~~Save full script output to a file~~
+- [x] Support URL/DNS - Thanks @KatsuragiCSL
+- [x] Add extensions fuzzing for http recon
+- [x] Add an nmap progress bar
+- [x] List missing tools in recon
+- [x] Add option to change output folder
+- [x] Save full script output to a file
+- [x] Improve performance and efficiency of the script - Thanks @caribpa
 
 
 ## Add more recon options
