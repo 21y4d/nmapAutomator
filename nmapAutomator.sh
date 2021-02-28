@@ -64,7 +64,7 @@ if [ -z "${OUTPUTDIR}" ]; then
 fi
 
 usage() {
-        echo -e ""
+        echo
         echo -e "${RED}Usage: $0 -H/--host <TARGET-IP> -t/--type <TYPE> [-d/--dns <DNS SERVER> -o/--output <OUTPUT DIRECTORY>]"
         echo -e "${YELLOW}"
         echo -e "Scan Types:"
@@ -80,7 +80,7 @@ usage() {
 }
 
 header() {
-        echo -e ""
+        echo
 
         if [ ${TYPE} = "All" ]; then
                 echo -e "${YELLOW}Running all scans on ${HOST}"
@@ -107,8 +107,8 @@ header() {
                 echo -e "${NC}"
         fi
 
-        echo -e ""
-        echo -e ""
+        echo
+        echo
 }
 
 assignPorts() {
@@ -214,9 +214,9 @@ quickScan() {
         nmapProgressBar "${nmapType} -T4 --max-retries 1 --max-scan-delay 20 --defeat-rst-ratelimit --open -oN nmap/Quick_${HOST}.nmap ${HOST} ${DNSSTRING}"
         assignPorts "${HOST}"
 
-        echo -e ""
-        echo -e ""
-        echo -e ""
+        echo
+        echo
+        echo
 }
 
 basicScan() {
@@ -240,9 +240,9 @@ basicScan() {
                 fi
         fi
 
-        echo -e ""
-        echo -e ""
-        echo -e ""
+        echo
+        echo
+        echo
 }
 
 UDPScan() {
@@ -252,15 +252,15 @@ UDPScan() {
         if [ "${USER}" != 'root' ]; then
                 echo "UDP needs to be run as root, running with sudo..."
                 sudo -v
-                echo ""
+                echo
         fi
 
         nmapProgressBar "sudo ${nmapType} -sU --max-retries 1 --open -oN nmap/UDP_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
         assignPorts "${HOST}"
 
         if [ -n "${udpPorts}" ]; then
-                echo ""
-                echo ""
+                echo
+                echo
                 echo -e "${YELLOW}Making a script scan on UDP ports: $(echo "${udpPorts}" | sed 's/,/, /g')"
                 echo -e "${NC}"
                 if [ -f /usr/share/nmap/scripts/vulners.nse ]; then
@@ -269,15 +269,15 @@ UDPScan() {
                         nmapProgressBar "${nmapType} -sCVU -p${udpPorts} -oN nmap/UDP_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                 fi
         else
-                echo ""
-                echo ""
+                echo
+                echo
                 echo -e "${YELLOW}No UDP ports are open"
                 echo -e "${NC}"
         fi
 
-        echo -e ""
-        echo -e ""
-        echo -e ""
+        echo
+        echo
+        echo
 }
 
 fullScan() {
@@ -288,8 +288,8 @@ fullScan() {
         assignPorts "${HOST}"
 
         if [ -z "${basicPorts}" ]; then
-                echo ""
-                echo ""
+                echo
+                echo
                 echo -e "${YELLOW}Making a script scan on all ports"
                 echo -e "${NC}"
                 nmapProgressBar "${nmapType} -sCV -p${allPorts} -oN nmap/Full_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
@@ -297,14 +297,14 @@ fullScan() {
         else
                 cmpPorts "${HOST}"
                 if [ -z "${extraPorts}" ]; then
-                        echo ""
-                        echo ""
+                        echo
+                        echo
                         allPorts=""
                         echo -e "${YELLOW}No new ports"
                         echo -e "${NC}"
                 else
-                        echo ""
-                        echo ""
+                        echo
+                        echo
                         echo -e "${YELLOW}Making a script scan on extra ports: $(echo "${extraPorts}" | sed 's/,/, /g')"
                         echo -e "${NC}"
                         nmapProgressBar "${nmapType} -sCV -p${extraPorts} -oN nmap/Full_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
@@ -312,9 +312,9 @@ fullScan() {
                 fi
         fi
 
-        echo -e ""
-        echo -e ""
-        echo -e ""
+        echo
+        echo
+        echo
 }
 
 vulnsScan() {
@@ -339,17 +339,17 @@ vulnsScan() {
                 echo -e "${YELLOW}Running CVE scan on ${portType} ports"
                 echo -e "${NC}"
                 nmapProgressBar "${nmapType} -sV --script vulners --script-args mincvss=7.0 -p${ports} -oN nmap/CVEs_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
-                echo ""
+                echo
         fi
 
-        echo ""
+        echo
         echo -e "${YELLOW}Running Vuln scan on ${portType} ports"
         echo -e "${YELLOW}This may take a while, depending on the number of detected services.."
         echo -e "${NC}"
         nmapProgressBar "${nmapType} -sV --script vuln -p${ports} -oN nmap/Vulns_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
-        echo -e ""
-        echo -e ""
-        echo -e ""
+        echo
+        echo
+        echo
 }
 
 recon() {
@@ -396,9 +396,9 @@ recon() {
                                 reconCommand="!"
                         elif [ "${reconCommand}" = "Skip" ] || [ "${reconCommand}" = "!" ]; then
                                 reconCommand="!"
-                                echo -e ""
-                                echo -e ""
-                                echo -e ""
+                                echo
+                                echo
+                                echo
                         else
                                 echo -e "${NC}"
                                 echo -e "${RED}Incorrect choice!"
@@ -452,7 +452,7 @@ reconRecommend() {
                                 extensions=$(echo 'index' >./index && gobuster dir -w ./index -t 30 -qnkx '.asp,.aspx,.html,.jsp,.php' -s '200,302' -u ${urlType}${HOST}:${port} 2>/dev/null | awk -F 'index' {'print $2'} | tr '\n' ',' | head -c-1 && rm ./index)
                                 echo "gobuster dir -w /usr/share/wordlists/dirb/common.txt -t 30 -elkx '${extensions}' -u ${urlType}${HOST}:${port} -o recon/gobuster_${HOST}_${port}.txt"
                         fi
-                        echo ""
+                        echo
                 fi
         done
 
@@ -480,7 +480,7 @@ reconRecommend() {
                 echo -e "${YELLOW}SMTP Recon:"
                 echo -e "${NC}"
                 echo "smtp-user-enum -U /usr/share/wordlists/metasploit/unix_users.txt -t ${HOST} | tee recon/smtp_user_enum_${HOST}.txt"
-                echo ""
+                echo
         fi
 
         if echo "${file}" | grep -q "445/tcp"; then
@@ -494,13 +494,13 @@ reconRecommend() {
                 elif [ ${osType} = "Linux" ]; then
                         echo "enum4linux -a ${HOST} | tee recon/enum4linux_${HOST}.txt"
                 fi
-                echo ""
+                echo
         elif echo "${file}" | grep -q "139/tcp" && [ ${osType} = "Linux" ]; then
                 echo -e "${NC}"
                 echo -e "${YELLOW}SMB Recon:"
                 echo -e "${NC}"
                 echo "enum4linux -a ${HOST} | tee recon/enum4linux_${HOST}.txt"
-                echo ""
+                echo
         fi
 
         if [ -f nmap/UDP_Extra_"${HOST}".nmap ] && grep -q "161/udp.*open" nmap/UDP_Extra_"${HOST}".nmap; then
@@ -509,7 +509,7 @@ reconRecommend() {
                 echo -e "${NC}"
                 echo "snmp-check ${HOST} -c public | tee recon/snmpcheck_${HOST}.txt"
                 echo "snmpwalk -Os -c public -v1 ${HOST} | tee recon/snmpwalk_${HOST}.txt"
-                echo ""
+                echo
         fi
 
         if echo "${file}" | grep -q "53/tcp"; then
@@ -520,7 +520,7 @@ reconRecommend() {
                 echo "dnsrecon -r ${subnet}/24 -n ${DNSSERVER} | tee recon/dnsrecon_${HOST}.txt"
                 echo "dnsrecon -r 127.0.0.0/24 -n ${DNSSERVER} | tee recon/dnsrecon-local_${HOST}.txt"
                 echo "dig -x ${HOST} @${DNSSERVER} | tee recon/dig_${HOST}.txt"
-                echo ""
+                echo
         fi
 
         if echo "${file}" | grep -q "389/tcp"; then
@@ -530,7 +530,7 @@ reconRecommend() {
                 echo "ldapsearch -x -h ${HOST} -s base | tee recon/ldapsearch_${HOST}.txt"
                 echo "ldapsearch -x -h ${HOST} -b \$(grep rootDomainNamingContext recon/ldapsearch_${HOST}.txt | cut -d ' ' -f2) | tee recon/ldapsearch_DC_${HOST}.txt"
                 echo "nmap -Pn -p 389 --script ldap-search --script-args 'ldap.username=\"\$(grep rootDomainNamingContext recon/ldapsearch_${HOST}.txt | cut -d \\" \\" -f2)\"' ${HOST} -oN recon/nmap_ldap_${HOST}.txt"
-                echo ""
+                echo
         fi
 
         if echo "${file}" | grep -q "1521/tcp"; then
@@ -539,20 +539,20 @@ reconRecommend() {
                 echo -e "${NC}"
                 echo "odat sidguesser -s ${HOST} -p 1521"
                 echo "odat passwordguesser -s ${HOST} -p 1521 -d XE --accounts-file accounts/accounts-multiple.txt"
-                echo ""
+                echo
         fi
 
         IFS=${oldIFS}
 
-        echo -e ""
-        echo -e ""
-        echo -e ""
+        echo
+        echo
+        echo
 }
 
 runRecon() {
-        echo -e ""
-        echo -e ""
-        echo -e ""
+        echo
+        echo
+        echo
         echo -e "${GREEN}---------------------Running Recon Commands----------------------"
         echo -e "${NC}"
 
@@ -584,16 +584,16 @@ runRecon() {
 
         IFS=${oldIFS}
 
-        echo -e ""
-        echo -e ""
-        echo -e ""
+        echo
+        echo
+        echo
 }
 
 footer() {
 
         echo -e "${GREEN}---------------------Finished all Nmap scans---------------------"
         echo -e "${NC}"
-        echo -e ""
+        echo
 
         if [ ${SECONDS} -gt 3600 ]; then
                 let "hours=SECONDS/3600"
@@ -607,7 +607,7 @@ footer() {
         else
                 echo -e "${YELLOW}Completed in ${SECONDS} seconds"
         fi
-        echo -e ""
+        echo
 }
 
 main() {
