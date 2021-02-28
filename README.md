@@ -17,13 +17,13 @@ Once initial ports are found '*in 5-10 seconds*', we can start manually looking 
   
 ## Features:
 1. **Quick:** Shows all open ports quickly (~15 seconds)  
-1. **Basic:** Runs Quick Scan, then runs a more thorough scan on found ports (~5 minutes)  
-1. **UDP:** Runs "Basic" on UDP ports (~5 minutes)  
-1. **Full:** Runs a full range port scan, then runs a thorough scan on new ports (~5-10 minutes)  
-1. **Vulns:** Runs CVE scan and nmap Vulns scan on all found ports (~5-15 minutes)  
-1. **Recon:** Runs "Basic" scan "if not yet run", then suggests recon commands "i.e. gobuster, nikto, smbmap" based on the found ports, then prompts to automatically run them  
-1. **All:** Runs all the scans consecutively (~20-30 minutes)  
-  
+2. **Basic:** Runs Quick Scan, then runs a more thorough scan on found ports (~5 minutes)  
+3. **UDP:** Runs "Basic" on UDP ports (~5 minutes)  
+4. **Full:** Runs a full range port scan, then runs a thorough scan on new ports (~5-10 minutes)  
+5. **Vulns:** Runs CVE scan and nmap Vulns scan on all found ports (~5-15 minutes)  
+6. **Recon:** Runs "Basic" scan "if not yet run", then suggests recon commands "i.e. gobuster, nikto, smbmap" based on the found ports, then prompts to automatically run them  
+7. **All:** Runs all the scans consecutively (~20-30 minutes)  
+
   -----
   
 ## Requirements:
@@ -61,7 +61,9 @@ git clone https://github.com/21y4d/nmapAutomator.git
 sudo ln -s $(pwd)/nmapAutomator/nmapAutomator.sh /usr/local/bin/
 ```
 
-## Examples of use:
+-----
+
+## Usage:
 ```
 ./nmapAutomator.sh -h
 Usage: ./nmapAutomator.sh -H/--host <TARGET-IP> -t/--type <TYPE> [-d/--dns <DNS SERVER> -o/--output <OUTPUT DIRECTORY>]
@@ -76,12 +78,16 @@ Scan Types:
 	All  : Runs all the scans (~20-30 minutes)
 ```
 
-**Example commands**:
+**Example scans**:
 ```
 ./nmapAutomator.sh --host 10.1.1.1 --type All
 ./nmapAutomator.sh -H 10.1.1.1 -t Basic
 ./nmapAutomator.sh -H academy.htb -t Recon -d 1.1.1.1
 ```
+
+**Output**:  
+The output of each type of scan is saved into a separate file, under the output directory.  
+The entire script output is also saved, which you can view with `less -r outputDir/nmapAutomator_host_type.txt`, or you can simply `cat` it.
 
 ------
 
@@ -92,6 +98,7 @@ Scan Types:
 - [x] ~~Add an nmap progress bar~~
 - [x] ~~List missing tools in recon~~
 - [x] ~~Add option to change output folder~~
+- [x] ~~Save full script output to a file~~
 
 
 ## Add more recon options
