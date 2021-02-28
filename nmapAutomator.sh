@@ -226,7 +226,7 @@ basicScan() {
         if [ -z "${basicPorts}" ]; then
                 echo -e "${YELLOW}No ports in quick scan.. Skipping!"
         else
-                nmapProgressBar "${nmapType} -sCV -p$(echo ${basicPorts}) -oN nmap/Basic_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
+                nmapProgressBar "${nmapType} -sCV -p${basicPorts} -oN nmap/Basic_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
         fi
 
         if [ -f nmap/Basic_"${HOST}".nmap ] && grep -q "Service Info: OS:" nmap/Basic_"${HOST}".nmap; then
@@ -264,9 +264,9 @@ UDPScan() {
                 echo -e "${YELLOW}Making a script scan on UDP ports: $(echo "${udpPorts}" | sed 's/,/, /g')"
                 echo -e "${NC}"
                 if [ -f /usr/share/nmap/scripts/vulners.nse ]; then
-                        nmapProgressBar "${nmapType} -sCVU --script vulners --script-args mincvss=7.0 -p$(echo ${udpPorts}) -oN nmap/UDP_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
+                        nmapProgressBar "${nmapType} -sCVU --script vulners --script-args mincvss=7.0 -p${udpPorts} -oN nmap/UDP_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                 else
-                        nmapProgressBar "${nmapType} -sCVU -p$(echo ${udpPorts}) -oN nmap/UDP_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
+                        nmapProgressBar "${nmapType} -sCVU -p${udpPorts} -oN nmap/UDP_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                 fi
         else
                 echo ""
@@ -292,7 +292,7 @@ fullScan() {
                 echo ""
                 echo -e "${YELLOW}Making a script scan on all ports"
                 echo -e "${NC}"
-                nmapProgressBar "${nmapType} -sCV -p$(echo ${allPorts}) -oN nmap/Full_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
+                nmapProgressBar "${nmapType} -sCV -p${allPorts} -oN nmap/Full_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                 assignPorts "${HOST}"
         else
                 cmpPorts "${HOST}"
@@ -570,7 +570,7 @@ runRecon() {
         for line in ${reconCommands}; do
                 currentScan=$(echo "${line}" | cut -d " " -f 1 | sort -u | tr "\n" "," | sed 's/,/,\ /g' | head -c-2)
                 fileName=$(echo "${line}" | awk -F "recon/" '{print ${TYPE}}' | head -c-1)
-                if [ ! -z recon/$(echo "${fileName}") ] && [ ! -f recon/$(echo "${fileName}") ]; then
+                if [ ! -z recon/"${fileName}" ] && [ ! -f recon/"${fileName}" ]; then
                         echo -e "${NC}"
                         echo -e "${YELLOW}Starting ${currentScan} scan"
                         echo -e "${NC}"
