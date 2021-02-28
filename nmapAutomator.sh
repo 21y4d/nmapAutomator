@@ -611,20 +611,7 @@ footer() {
         echo -e ""
 }
 
-if [ -z "${TYPE}" ] || [ -z "${HOST}" ]; then
-        usage
-fi
-
-if ! [[ ${HOST} =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! [[ ${HOST} =~ ^([A-Za-z0-9-]{1,63}\.)+[A-Za-z]{2,6}$ ]]; then
-        echo -e "${RED}"
-        echo -e "${RED}Invalid IP or URL!"
-        echo -e "${RED}"
-        usage
-fi
-
-if [[ "${TYPE}" =~ ^(Quick|Basic|UDP|Full|Vulns|Recon|All|quick|basic|udp|full|vulns|recon|all)$ ]]; then
-        mkdir -p "${OUTPUTDIR}" && cd "${OUTPUTDIR}" && mkdir -p nmap/ || usage
-
+main() {
         assignPorts "${HOST}"
 
         header "${HOST}" "${TYPE}"
@@ -657,6 +644,22 @@ if [[ "${TYPE}" =~ ^(Quick|Basic|UDP|Full|Vulns|Recon|All|quick|basic|udp|full|v
         esac
 
         footer
+}
+
+if [ -z "${TYPE}" ] || [ -z "${HOST}" ]; then
+        usage
+fi
+
+if ! [[ ${HOST} =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! [[ ${HOST} =~ ^([A-Za-z0-9-]{1,63}\.)+[A-Za-z]{2,6}$ ]]; then
+        echo -e "${RED}"
+        echo -e "${RED}Invalid IP or URL!"
+        echo -e "${RED}"
+        usage
+fi
+
+if [[ "${TYPE}" =~ ^(Quick|Basic|UDP|Full|Vulns|Recon|All|quick|basic|udp|full|vulns|recon|all)$ ]]; then
+        mkdir -p "${OUTPUTDIR}" && cd "${OUTPUTDIR}" && mkdir -p nmap/ || usage
+        main | tee nmapAutomator_"${HOST}"_"${TYPE}".txt
 else
         echo -e "${RED}"
         echo -e "${RED}Invalid Type!"
