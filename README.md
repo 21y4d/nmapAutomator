@@ -52,7 +52,8 @@ Other Recon tools used within the script include:
 * [odat](https://github.com/quentinhardy/odat)
 * [smtp-user-enum](https://github.com/pentestmonkey/smtp-user-enum)
   
-*Most of these should be installed by default in [Parrot OS](https://www.parrotsec.org) and [Kali Linux](https://www.kali.org).*
+Most of these should be installed by default in [Parrot OS](https://www.parrotsec.org) and [Kali Linux](https://www.kali.org).  
+*If any recon recommended tools are found to be missing, they will be automatically omitted, and the user will be notified.*
   
 ## Installation:
 ```bash
@@ -89,8 +90,8 @@ Scan Types:
 - [x] ~~Support DNS resolution "use of urls/domains instead of IPs"~~ - Done, thanks @KatsuragiCSL
 - [x] ~~Properly identify url extensions "testing index extensions for code 200"~~
 - [x] ~~Add an nmap progress bar~~
-- [ ] List missing tools in the usage menu
-- [ ] Add option to change output folder
+- [x] ~~List missing tools in the usage menu~~
+- [x] ~~Add option to change output folder~~
 
 
 ## Add more recon options
