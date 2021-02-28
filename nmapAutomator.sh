@@ -371,7 +371,7 @@ recon() {
 
                 availableRecon="$(echo "${allRecon}" | tr " " "\n" | grep -vE $(echo "${missingTools}" | tr " " "|") | tr "\n" "," | sed 's/,/,\ /g' | head -c-2)"
         else
-                availableRecon="$(echo "${allRecon}" | sed 's/\ /,\ /g')"
+                availableRecon="$(echo "${allRecon}" | tr "\n" " " | sed 's/\ /,\ /g')"
         fi
 
         secs=30
