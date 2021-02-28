@@ -177,17 +177,17 @@ progressBar() {
         [ $(stty size | cut -d ' ' -f 2) -le 120 ] && width=50 || width=100
         fill=$(printf "%-$((width == 100 ? $2 : ($2 / 2)))s" "#")
         empty=$(printf "%-$((width - (width == 100 ? $2 : ($2 / 2))))s" " ")
-        echo -e "In progress: ${1} Scan (${3} elapsed - ${4} remaining)   "
-        echo -e "[${fill// /\#}>${empty// / }] ${2}% done   "
+        echo -e "In progress: $1 Scan ($3 elapsed - $4 remaining)   "
+        echo -e "[${fill// /\#}>${empty// / }] $2% done   "
         echo -ne "\e[2A"
 }
 
 nmapProgressBar() {
         refreshRate=${2:-"0.5"}
-        outputFile=$(echo ${1} | sed -e 's/.*-oN \(.*\).nmap.*/\1/').nmap
+        outputFile=$(echo $1 | sed -e 's/.*-oN \(.*\).nmap.*/\1/').nmap
         tmpOutputFile=${outputFile}.tmp
-                ${1} --stats-every ${refreshRate}s >${tmpOutputFile} 2>&1 &
         if [ ! -e ${outputFile} ]; then
+                $1 --stats-every ${refreshRate}s >${tmpOutputFile} 2>&1 &
         fi
 
         while { [ ! -e ${outputFile} ] || ! grep -q "Nmap done at" ${outputFile}; } && { [ ! -e ${tmpOutputFile} ] || ! grep -i -q "quitting" ${tmpOutputFile}; }; do
