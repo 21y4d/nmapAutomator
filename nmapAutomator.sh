@@ -53,12 +53,11 @@ if [ -z "$TYPE" ]; then
 fi
 
 if [ -n "$DNS" ]; then
-        DNSSTRING="--dns-server="$DNS
-        DNSSERVER=$DNS
+        DNSSERVER="${DNS}"
 else
-        DNSSTRING="--dns-server=1.1.1.1"
         DNSSERVER="1.1.1.1"
 fi
+DNSSTRING="--dns-server=${DNSSERVER}"
 
 if [ -z "$OUTPUTDIR" ]; then
         OUTPUTDIR="${HOST}"
