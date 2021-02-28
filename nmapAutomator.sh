@@ -380,7 +380,7 @@ recon() {
         if [ -n "${availableRecon}" ]; then
                 while [ "${reconCommand}" != "!" ]; do
                         echo -e "${YELLOW}"
-                        echo -e "Which commands would you like to run?${NC}\nAll (Default), ${availableRecon}, Skip <!>\n"
+                        echo -e "Which commands would you like to run?${NC}\nAll (Default), ${availableRecon}Skip <!>\n"
                         while [ ${count} -lt ${secs} ]; do
                                 tlimit=$((secs - count))
                                 echo -e "\rRunning Default in (${tlimit}) s: \c"
