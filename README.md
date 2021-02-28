@@ -90,6 +90,7 @@ Scan Types:
 - [x] ~~Properly identify url extensions "testing index extensions for code 200"~~
 - [x] ~~Add an nmap progress bar~~
 - [ ] List missing tools in the usage menu
+- [ ] Add option to change output folder
 
 
 ## Add more recon options
