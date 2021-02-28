@@ -570,7 +570,7 @@ runRecon() {
         for line in ${reconCommands}; do
                 currentScan=$(echo "${line}" | cut -d " " -f 1 | sort -u | tr "\n" "," | sed 's/,/,\ /g' | head -c-2)
                 fileName=$(echo "${line}" | awk -F "recon/" '{print ${TYPE}}' | head -c-1)
-                if [ ! -z recon/"${fileName}" ] && [ ! -f recon/"${fileName}" ]; then
+                if [ -n "${fileName}" ] && [ ! -f recon/"${fileName}" ]; then
                         echo -e "${NC}"
                         echo -e "${YELLOW}Starting ${currentScan} scan"
                         echo -e "${NC}"
