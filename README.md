@@ -27,30 +27,24 @@ Once initial ports are found '*in 5-10 seconds*', we can start manually looking 
   -----
   
 ## Requirements:
-[Gobuster](https://github.com/OJ/gobuster) '*v3.0 or higher*', which we can install with:  
+[ffuf](https://github.com/ffuf/ffuf), which we can install with:
 ```bash
 sudo apt update
-sudo apt install gobuster
+sudo apt install ffuf -y
 ```
 
-or [ffuf](https://github.com/ffuf/ffuf), which we can install with:
+Or [Gobuster](https://github.com/OJ/gobuster) '*v3.0 or higher*', which we can install with:  
 ```bash
 sudo apt update
-sudo apt install ffuf
+sudo apt install gobuster -y
 ```
 
-Other Recon tools used within the script include:
-* [nmap Vulners](https://github.com/vulnersCom/nmap-vulners)
-* [sslscan](https://github.com/rbsec/sslscan)
-* [nikto](https://github.com/sullo/nikto)
-* [joomscan](https://github.com/rezasp/joomscan)
-* [wpscan](https://github.com/wpscanteam/wpscan)
-* [droopescan](https://github.com/droope/droopescan)
-* [smbmap](https://github.com/ShawnDEvans/smbmap)
-* [enum4linux](https://github.com/portcullislabs/enum4linux)
-* [dnsrecon](https://github.com/darkoperator/dnsrecon)
-* [odat](https://github.com/quentinhardy/odat)
-* [smtp-user-enum](https://github.com/pentestmonkey/smtp-user-enum)
+Other recon tools used within the script include:
+|[nmap Vulners](https://github.com/vulnersCom/nmap-vulners)|[sslscan](https://github.com/rbsec/sslscan)|[nikto](https://github.com/sullo/nikto)|[joomscan](https://github.com/rezasp/joomscan)|[wpscan](https://github.com/wpscanteam/wpscan)|
+|:-:|:-:|:-:|:-:|:-:|
+|[droopescan](https://github.com/droope/droopescan)|[smbmap](https://github.com/ShawnDEvans/smbmap)|[enum4linux](https://github.com/portcullislabs/enum4linux)|[dnsrecon](https://github.com/darkoperator/dnsrecon)|[odat](https://github.com/quentinhardy/odat)|
+|[smtp-user-enum](https://github.com/pentestmonkey/smtp-user-enum)|snmp-check|snmpwalk|ldapsearch||
+
   
 Most of these should be installed by default in [Parrot OS](https://www.parrotsec.org) and [Kali Linux](https://www.kali.org).  
 *If any recon recommended tools are found to be missing, they will be automatically omitted, and the user will be notified.*
