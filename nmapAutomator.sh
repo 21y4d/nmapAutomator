@@ -574,7 +574,7 @@ runRecon() {
                         echo -e "${NC}"
                         echo -e "${YELLOW}Starting ${currentScan} scan"
                         echo -e "${NC}"
-                        echo "${line}" | /bin/bash
+                        eval "${line}"
                         echo -e "${NC}"
                         echo -e "${YELLOW}Finished ${currentScan} scan"
                         echo -e "${NC}"
