@@ -92,7 +92,7 @@ The entire script output is also saved, which you can view with `less -r outputD
 ------
 
 ## TODO features list
-**Feel free to send your pull requests and contributions :)**
+**Feel free to send your pull requests :)**
 - [x] ~~Support DNS resolution "use of urls/domains instead of IPs"~~ - Done, thanks @KatsuragiCSL
 - [x] ~~Properly identify url extensions "testing index extensions for code 200"~~
 - [x] ~~Add an nmap progress bar~~
