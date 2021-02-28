@@ -63,7 +63,7 @@ sudo ln -s $(pwd)/nmapAutomator/nmapAutomator.sh /usr/local/bin/
 ## Examples of use:
 ```
 ./nmapAutomator.sh -h
-Usage: ./nmapAutomator.sh -H/--host <TARGET-IP> -t/--type <TYPE> [-d/--dns <DNS SERVER>]
+Usage: ./nmapAutomator.sh -H/--host <TARGET-IP> -t/--type <TYPE> [-d/--dns <DNS SERVER> -o/--output <OUTPUT DIRECTORY>]
 
 Scan Types:
 	Quick: Shows all open ports quickly (~15 seconds)
