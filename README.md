@@ -94,6 +94,7 @@ The entire script output is also saved, which you can view with `less -r outputD
 - [x] Add option to change output folder
 - [x] Save full script output to a file
 - [x] Improve performance and efficiency of the script - Thanks @caribpa
+- [ ] Add remote mode, which uses bash only without any external tools (for lateral movement in a network)
 
 
 ## Add more recon options
