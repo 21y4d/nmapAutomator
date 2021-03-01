@@ -369,7 +369,7 @@ recon() {
                 echo -e "${YELLOW}sudo apt install${missingTools} -y"
                 echo -e "${NC}\n"
 
-                availableRecon="$(echo "${allRecon}" | tr " " "\n" | grep -vE $(echo "${missingTools}" | tr " " "|") | tr "\n" "," | sed 's/,/,\ /g' | head -c-2)"
+                availableRecon="$(echo "${allRecon}" | tr " " "\n" | grep -vE "$(echo "${missingTools}" | tr " " "|")" | tr "\n" "," | sed 's/,/,\ /g' | head -c-2)"
         else
                 availableRecon="$(echo "${allRecon}" | tr "\n" " " | sed 's/\ /,\ /g')"
         fi
