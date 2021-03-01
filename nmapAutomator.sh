@@ -355,7 +355,7 @@ vulnsScan() {
 recon() {
 
         reconRecommend "${HOST}" | tee "nmap/Recon_${HOST}.nmap"
-        allRecon="$(grep "${HOST}" "nmap/Recon_${HOST}.nmap" | cut -d " " -f 1 | sort -u)"
+        allRecon="$(grep "${HOST}" "nmap/Recon_${HOST}.nmap" | cut -d " " -f 1 | sort | uniq)"
 
         for tool in ${allRecon}; do
                 if ! type "${tool}" 2>/dev/null | grep -q bin; then
@@ -421,7 +421,7 @@ reconRecommend() {
 
         if [ -f "nmap/Full_Extra_${HOST}.nmap" ]; then
                 ports="${allPorts}"
-                file="$(cat "nmap/Basic_${HOST}.nmap" "nmap/Full_Extra_${HOST}.nmap" | grep "open" | sort -u)"
+                file="$(cat "nmap/Basic_${HOST}.nmap" "nmap/Full_Extra_${HOST}.nmap" | grep "open" | sort | uniq)"
         else
                 ports="${basicPorts}"
                 file="$(grep "open" "nmap/Basic_${HOST}.nmap")"
@@ -568,7 +568,7 @@ runRecon() {
         fi
 
         for line in ${reconCommands}; do
-                currentScan="$(echo "${line}" | cut -d " " -f 1 | sort -u | tr "\n" "," | sed 's/,/,\ /g' | head -c-2)"
+                currentScan="$(echo "${line}" | cut -d " " -f 1 | sort | uniq | tr "\n" "," | sed 's/,/,\ /g' | head -c-2)"
                 fileName="$(echo "${line}" | awk -F "recon/" '{print $2}' | head -c-1)"
                 if [ -n "${fileName}" ] && [ ! -f recon/"${fileName}" ]; then
                         echo -e "${NC}"
