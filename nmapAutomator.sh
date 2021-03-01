@@ -596,13 +596,13 @@ footer() {
         echo
 
         if [ ${SECONDS} -gt 3600 ]; then
-                let "hours=SECONDS/3600"
-                let "minutes=(SECONDS%3600)/60"
-                let "seconds=(SECONDS%3600)%60"
+                hours=$((SECONDS / 3600))
+                minutes=$(((SECONDS % 3600) / 60))
+                seconds=$(((SECONDS % 3600) % 60))
                 printf "${YELLOW}Completed in ${hours} hour(s), ${minutes} minute(s) and ${seconds} second(s)\n"
         elif [ ${SECONDS} -gt 60 ]; then
-                let "minutes=(SECONDS%3600)/60"
-                let "seconds=(SECONDS%3600)%60"
+                minutes=$(((SECONDS % 3600) / 60))
+                seconds=$(((SECONDS % 3600) % 60))
                 printf "${YELLOW}Completed in ${minutes} minute(s) and ${seconds} second(s)\n"
         else
                 printf "${YELLOW}Completed in ${SECONDS} seconds\n"
