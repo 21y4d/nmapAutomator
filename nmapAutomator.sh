@@ -113,19 +113,19 @@ header() {
 
 assignPorts() {
         if [ -f "nmap/Quick_${HOST}.nmap" ]; then
-                basicPorts="$(grep open "nmap/Quick_${HOST}.nmap" | cut -d " " -f 1 | cut -d "/" -f 1 | tr "\n" "," | cut -c3- | head -c-2)"
+                basicPorts="$(awk -vORS=, -F/ '/^[0-9]/{print $1} END{printf "\b"}' "nmap/Quick_${HOST}.nmap")"
         fi
 
         if [ -f "nmap/Full_${HOST}.nmap" ]; then
                 if [ -f "nmap/Quick_${HOST}.nmap" ]; then
-                        allPorts="$(cat "nmap/Quick_${HOST}.nmap" "nmap/Full_${HOST}.nmap" | grep open | cut -d " " -f 1 | cut -d "/" -f 1 | tr "\n" "," | cut -c3- | head -c-1)"
+                        allPorts="$(awk -vORS=, -F/ '/^[0-9]/{print $1} END{printf "\b"}' "nmap/Quick_${HOST}.nmap" "nmap/Full_${HOST}.nmap")"
                 else
-                        allPorts="$(grep open "nmap/Full_${HOST}.nmap" | cut -d " " -f 1 | cut -d "/" -f 1 | tr "\n" "," | head -c-1)"
+                        allPorts="$(awk -vORS=, -F/ '/^[0-9]/{print $1} END{printf "\b"}' "nmap/Full_${HOST}.nmap")"
                 fi
         fi
 
         if [ -f "nmap/UDP_${HOST}.nmap" ]; then
-                udpPorts="$(grep "open " "nmap/UDP_${HOST}.nmap" | cut -d " " -f 1 | cut -d "/" -f 1 | tr "\n" "," | cut -c3- | head -c-2)"
+                udpPorts="$(awk -vORS=, -F/ '/^[0-9]/{print $1} END{printf "\b"}' "nmap/UDP_${HOST}.nmap")"
                 if [ "${udpPorts}" = "Al" ]; then
                         udpPorts=""
                 fi
@@ -167,7 +167,7 @@ cmpPorts() {
                 fi
         done
 
-        extraPorts="$(tr "\n" "," < "nmap/cmpPorts_${HOST}.txt" | head -c-1)"
+        extraPorts="$(awk -vORS=, '//; END{printf "\b"}' "nmap/cmpPorts_${HOST}.txt")"
         rm "nmap/cmpPorts_${HOST}.txt"
         IFS="${oldIFS}"
 }
@@ -230,7 +230,7 @@ basicScan() {
         fi
 
         if [ -f "nmap/Basic_${HOST}.nmap" ] && grep -q "Service Info: OS:" "nmap/Basic_${HOST}.nmap"; then
-                serviceOS="$(grep "Service Info: OS:" "nmap/Basic_${HOST}.nmap" | cut -d ":" -f 3 | cut -c2- | cut -d ";" -f 1 | head -c-1)"
+                    serviceOS="$(sed -n '/Service Info/{s/.* \([^;]*\);.*/\1/p;q}' "nmap/Basic_${HOST}.nmap")"
                 if [ "${osType}" != "${serviceOS}" ]; then
                         osType="${serviceOS}"
                         printf "${NC}\n"
@@ -369,7 +369,7 @@ recon() {
                 printf "${YELLOW}sudo apt install${missingTools} -y\n"
                 printf "${NC}\n\n"
 
-                availableRecon="$(echo "${allRecon}" | tr " " "\n" | grep -vE "$(echo "${missingTools}" | tr " " "|")" | tr "\n" "," | sed 's/,/,\ /g' | head -c-2)"
+                availableRecon="$(echo "${allRecon}" | awk -vORS=', ' '!/'"$(echo "${missingTools}" | tr " " "|")"'/; END{printf "\b\b"}')"
         else
                 availableRecon="$(echo "${allRecon}" | tr "\n" " " | sed 's/\ /,\ /g')"
         fi
@@ -446,10 +446,10 @@ reconRecommend() {
                                 echo "nikto -host \"${urlType}${HOST}:${port}\" | tee \"recon/nikto_${HOST}_${port}.txt\""
                         fi
                         if type ffuf | grep -q bin; then
-                                extensions="$(echo 'index' >./index && ffuf -s -w ./index:FUZZ -mc '200,302' -e '.asp,.aspx,.html,.jsp,.php' -u "${urlType}${HOST}:${port}/FUZZ" 2>/dev/null | awk -F 'index' '{print $2}' | tr '\n' ',' | head -c-1 && rm ./index)"
+                                extensions="$(echo 'index' >./index && ffuf -s -w ./index:FUZZ -mc '200,302' -e '.asp,.aspx,.html,.jsp,.php' -u "${urlType}${HOST}:${port}/FUZZ" 2>/dev/null | awk -vORS=, -F 'index' '{print $2} END{printf "\b"}' && rm ./index)"
                                 echo "ffuf -ic -w /usr/share/wordlists/dirb/common.txt -e '${extensions}' -u \"${urlType}${HOST}:${port}/FUZZ\" | tee \"recon/ffuf_${HOST}_${port}.txt\""
                         else
-                                extensions="$(echo 'index' >./index && gobuster dir -w ./index -t 30 -qnkx '.asp,.aspx,.html,.jsp,.php' -s '200,302' -u "${urlType}${HOST}:${port}" 2>/dev/null | awk -F 'index' '{print $2}' | tr '\n' ',' | head -c-1 && rm ./index)"
+                                extensions="$(echo 'index' >./index && gobuster dir -w ./index -t 30 -qnkx '.asp,.aspx,.html,.jsp,.php' -s '200,302' -u "${urlType}${HOST}:${port}" 2>/dev/null | awk -vORS=, -F 'index' '{print $2} END{printf "\b"}' && rm ./index)"
                                 echo "gobuster dir -w /usr/share/wordlists/dirb/common.txt -t 30 -elkx '${extensions}' -u \"${urlType}${HOST}:${port}\" -o \"recon/gobuster_${HOST}_${port}.txt\""
                         fi
                         echo
@@ -568,8 +568,8 @@ runRecon() {
         fi
 
         for line in ${reconCommands}; do
-                currentScan="$(echo "${line}" | cut -d " " -f 1 | sort | uniq | tr "\n" "," | sed 's/,/,\ /g' | head -c-2)"
-                fileName="$(echo "${line}" | awk -F "recon/" '{print $2}' | head -c-1)"
+                currentScan="$(echo "${line}" | sort | awk -vORS=', ' '{print $1} END{printf "\b\b"}')"
+                fileName="$(echo "${line}" | awk -F "recon/" '{print $2}')"
                 if [ -n "${fileName}" ] && [ ! -f recon/"${fileName}" ]; then
                         printf "${NC}\n"
                         printf "${YELLOW}Starting ${currentScan} scan\n"
