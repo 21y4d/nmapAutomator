@@ -175,10 +175,10 @@ cmpPorts() {
 progressBar() {
         [ -z "${2##*[!0-9]*}" ] && return 1
         [ "$(stty size | cut -d ' ' -f 2)" -le 120 ] && width=50 || width=100
-        fill="$(printf "%-$((width == 100 ? $2 : ($2 / 2)))s" "#")"
+        fill="$(printf "%-$((width == 100 ? $2 : ($2 / 2)))s" "#" | tr ' ' '#')"
         empty="$(printf "%-$((width - (width == 100 ? $2 : ($2 / 2))))s" " ")"
         printf "In progress: $1 Scan ($3 elapsed - $4 remaining)   \n"
-        printf "[${fill// /\#}>${empty// / }] $2% done   \n"
+        printf "[${fill}>${empty}] $2% done   \n"
         printf "\e[2A"
 }
 
