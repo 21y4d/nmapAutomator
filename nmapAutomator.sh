@@ -37,12 +37,12 @@ while [ $# -gt 0 ]; do
                 shift
                 ;;
         *)
-                POSITIONAL+=("$1")
+                POSITIONAL="${POSITIONAL} $1"
                 shift
                 ;;
         esac
 done
-set -- "${POSITIONAL[@]}"
+set -- ${POSITIONAL}
 
 if [ -z "${HOST}" ]; then
         HOST="$1"
