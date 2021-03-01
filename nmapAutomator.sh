@@ -138,7 +138,7 @@ checkPing() {
                 echo "nmap -Pn"
         else
                 echo "nmap"
-                if [[ "${HOST}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                if expr "${HOST}" : '^[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$' > /dev/null; then
                         ttl="$(echo "${pingTest}" | cut -d " " -f 6 | cut -d "=" -f 2)"
                 else
                         ttl="$(echo "${pingTest}" | cut -d " " -f 7 | cut -d "=" -f 2)"
@@ -157,19 +157,11 @@ checkOS() {
 }
 
 cmpPorts() {
-        oldIFS="${IFS}"
-        IFS=','
-        touch "nmap/cmpPorts_${HOST}.txt"
-
-        for i in ${allPorts}; do
-                if ! [[ "${i}" =~ ^("$(echo "${basicPorts}" | sed 's/,/\|/g')")$ ]]; then
-                        echo -n "${i}," >> "nmap/cmpPorts_${HOST}.txt"
-                fi
-        done
-
-        extraPorts="$(sed -n 'H;1x;${g;y/\n/,/;p}' "nmap/cmpPorts_${HOST}.txt")"
-        rm "nmap/cmpPorts_${HOST}.txt"
-        IFS="${oldIFS}"
+        # To understand this magic, suppose $allPorts=22,80,445,8080 and $basicPorts=22,80
+        # This is how it looks like with the inner sub-shell and variables expanded:
+        # extraPorts="$(echo ,22,80,445,8080, | sed 's/,\(22,\|80,\)\+/,/g; s/^,\|,$//g')"
+        # The result of the expansion: extraPorts="445,8080"
+        extraPorts="$(echo ",${allPorts}," | sed 's/,\('"$(echo "${basicPorts}" | sed 's/,/,\\|/g')"',\)\+/,/g; s/^,\|,$//g')"
 }
 
 progressBar() {
@@ -391,7 +383,7 @@ recon() {
                         if [ "${reconCommand}" = "All" ] || [ -z "${reconCommand}" ]; then
                                 runRecon "${HOST}" "All"
                                 reconCommand="!"
-                        elif [[ "${reconCommand}" =~ ^("$(echo "${availableRecon}" | tr ", " "|")")$ ]]; then
+                        elif expr " ${availableRecon}," : ".* ${reconCommand}," > /dev/null; then
                                 runRecon "${HOST}" "${reconCommand}"
                                 reconCommand="!"
                         elif [ "${reconCommand}" = "Skip" ] || [ "${reconCommand}" = "!" ]; then
@@ -461,7 +453,8 @@ reconRecommend() {
                 if [ -n "${cms}" ]; then
                         for line in ${cms}; do
                                 port="$(grep "${line}" -B1 "nmap/Basic_${HOST}.nmap" | grep "open" | cut -d "/" -f 1)"
-                                if [[ "${cms}" =~ ^(Joomla|WordPress|Drupal)$ ]]; then
+                                # case returns 0 by default (no match), so ! case returns 1
+                                if ! case "${cms}" in Joomla|WordPress|Drupal) false;; esac; then
                                         printf "${NC}\n"
                                         printf "${YELLOW}CMS Recon:\n"
                                         printf "${NC}\n"
@@ -649,14 +642,15 @@ if [ -z "${TYPE}" ] || [ -z "${HOST}" ]; then
         usage
 fi
 
-if ! [[ "${HOST}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! [[ "${HOST}" =~ ^([A-Za-z0-9-]{1,63}\.)+[A-Za-z]{2,6}$ ]]; then
+if ! expr "${HOST}" : '^\([0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\|\([[:alnum:]-]\{1,63\}\.\)\+[[:alpha:]]\{2,6\}\)$' > /dev/null; then
         printf "${RED}\n"
         printf "${RED}Invalid IP or URL!\n"
         printf "${RED}\n"
         usage
 fi
 
-if [[ "${TYPE}" =~ ^(Quick|Basic|UDP|Full|Vulns|Recon|All|quick|basic|udp|full|vulns|recon|all)$ ]]; then
+# case returns 0 by default (no match), so ! case returns 1; ! false -> true
+if ! case "${TYPE}" in [Qq]uick|[Bb]asic|UDP|udp|[Ff]ull|[Vv]ulns|[Rr]econ|[Aa]ll) false;; esac; then
         mkdir -p "${OUTPUTDIR}" && cd "${OUTPUTDIR}" && mkdir -p nmap/ || usage
         main | tee "nmapAutomator_${HOST}_${TYPE}.txt"
 else
