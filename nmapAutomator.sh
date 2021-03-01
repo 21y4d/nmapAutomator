@@ -113,19 +113,19 @@ header() {
 
 assignPorts() {
         if [ -f "nmap/Quick_${HOST}.nmap" ]; then
-                basicPorts="$(awk -vORS=, -F/ '/^[0-9]/{print $1} END{printf "\b"}' "nmap/Quick_${HOST}.nmap")"
+                basicPorts="$(awk -vORS=, -F/ '/^[0-9]/{print $1}' "nmap/Quick_${HOST}.nmap" | sed 's/.$//')"
         fi
 
         if [ -f "nmap/Full_${HOST}.nmap" ]; then
                 if [ -f "nmap/Quick_${HOST}.nmap" ]; then
-                        allPorts="$(awk -vORS=, -F/ '/^[0-9]/{print $1} END{printf "\b"}' "nmap/Quick_${HOST}.nmap" "nmap/Full_${HOST}.nmap")"
+                        allPorts="$(awk -vORS=, -F/ '/^[0-9]/{print $1}' "nmap/Quick_${HOST}.nmap" "nmap/Full_${HOST}.nmap" | sed 's/.$//')"
                 else
-                        allPorts="$(awk -vORS=, -F/ '/^[0-9]/{print $1} END{printf "\b"}' "nmap/Full_${HOST}.nmap")"
+                        allPorts="$(awk -vORS=, -F/ '/^[0-9]/{print $1}' "nmap/Full_${HOST}.nmap" | sed 's/.$//')"
                 fi
         fi
 
         if [ -f "nmap/UDP_${HOST}.nmap" ]; then
-                udpPorts="$(awk -vORS=, -F/ '/^[0-9]/{print $1} END{printf "\b"}' "nmap/UDP_${HOST}.nmap")"
+                udpPorts="$(awk -vORS=, -F/ '/^[0-9]/{print $1}' "nmap/UDP_${HOST}.nmap" | sed 's/.$//')"
                 if [ "${udpPorts}" = "Al" ]; then
                         udpPorts=""
                 fi
@@ -167,7 +167,7 @@ cmpPorts() {
                 fi
         done
 
-        extraPorts="$(awk -vORS=, '//; END{printf "\b"}' "nmap/cmpPorts_${HOST}.txt")"
+        extraPorts="$(sed -n 'H;1x;${g;y/\n/,/;p}' "nmap/cmpPorts_${HOST}.txt")"
         rm "nmap/cmpPorts_${HOST}.txt"
         IFS="${oldIFS}"
 }
@@ -369,7 +369,7 @@ recon() {
                 printf "${YELLOW}sudo apt install${missingTools} -y\n"
                 printf "${NC}\n\n"
 
-                availableRecon="$(echo "${allRecon}" | awk -vORS=', ' '!/'"$(echo "${missingTools}" | tr " " "|")"'/; END{printf "\b\b"}')"
+                availableRecon="$(echo "${allRecon}" | awk -vORS=', ' '!/'"$(echo "${missingTools}" | tr " " "|")"'/' | sed 's/..$//')"
         else
                 availableRecon="$(echo "${allRecon}" | tr "\n" " " | sed 's/\ /,\ /g')"
         fi
@@ -446,10 +446,10 @@ reconRecommend() {
                                 echo "nikto -host \"${urlType}${HOST}:${port}\" | tee \"recon/nikto_${HOST}_${port}.txt\""
                         fi
                         if type ffuf | grep -q bin; then
-                                extensions="$(echo 'index' >./index && ffuf -s -w ./index:FUZZ -mc '200,302' -e '.asp,.aspx,.html,.jsp,.php' -u "${urlType}${HOST}:${port}/FUZZ" 2>/dev/null | awk -vORS=, -F 'index' '{print $2} END{printf "\b"}' && rm ./index)"
+                                extensions="$(echo 'index' >./index && ffuf -s -w ./index:FUZZ -mc '200,302' -e '.asp,.aspx,.html,.jsp,.php' -u "${urlType}${HOST}:${port}/FUZZ" 2>/dev/null | awk -vORS=, -F 'index' '{print $2}' | sed 's/.$//' && rm ./index)"
                                 echo "ffuf -ic -w /usr/share/wordlists/dirb/common.txt -e '${extensions}' -u \"${urlType}${HOST}:${port}/FUZZ\" | tee \"recon/ffuf_${HOST}_${port}.txt\""
                         else
-                                extensions="$(echo 'index' >./index && gobuster dir -w ./index -t 30 -qnkx '.asp,.aspx,.html,.jsp,.php' -s '200,302' -u "${urlType}${HOST}:${port}" 2>/dev/null | awk -vORS=, -F 'index' '{print $2} END{printf "\b"}' && rm ./index)"
+                                extensions="$(echo 'index' >./index && gobuster dir -w ./index -t 30 -qnkx '.asp,.aspx,.html,.jsp,.php' -s '200,302' -u "${urlType}${HOST}:${port}" 2>/dev/null | awk -vORS=, -F 'index' '{print $2}' | sed 's/.$//' && rm ./index)"
                                 echo "gobuster dir -w /usr/share/wordlists/dirb/common.txt -t 30 -elkx '${extensions}' -u \"${urlType}${HOST}:${port}\" -o \"recon/gobuster_${HOST}_${port}.txt\""
                         fi
                         echo
@@ -568,7 +568,7 @@ runRecon() {
         fi
 
         for line in ${reconCommands}; do
-                currentScan="$(echo "${line}" | sort | awk -vORS=', ' '{print $1} END{printf "\b\b"}')"
+                currentScan="$(echo "${line}" | cut -d ' ' -f 1)"
                 fileName="$(echo "${line}" | awk -F "recon/" '{print $2}')"
                 if [ -n "${fileName}" ] && [ ! -f recon/"${fileName}" ]; then
                         printf "${NC}\n"
