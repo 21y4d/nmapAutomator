@@ -590,8 +590,7 @@ runRecon() {
 footer() {
 
         printf "${GREEN}---------------------Finished all Nmap scans---------------------\n"
-        printf "${NC}\n"
-        echo
+        printf "${NC}\n\n"
 
         if [ ${SECONDS} -gt 3600 ]; then
                 hours=$((SECONDS / 3600))
