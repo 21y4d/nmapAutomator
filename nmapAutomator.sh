@@ -175,7 +175,7 @@ progressBar() {
 }
 
 nmapProgressBar() {
-        refreshRate="${2:-0.5}"
+        refreshRate="${2:-1}"
         outputFile="$(echo $1 | sed -e 's/.*-oN \(.*\).nmap.*/\1/').nmap"
         tmpOutputFile="${outputFile}.tmp"
         if [ ! -e "${outputFile}" ]; then
