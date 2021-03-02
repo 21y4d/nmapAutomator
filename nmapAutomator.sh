@@ -455,7 +455,8 @@ reconRecommend() {
                 cms="$(grep http-generator "nmap/Basic_${HOST}.nmap" | cut -d " " -f 2)"
                 if [ -n "${cms}" ]; then
                         for line in ${cms}; do
-                                port="$(grep "${line}" -B1 "nmap/Basic_${HOST}.nmap" | grep "open" | cut -d "/" -f 1)"
+                                port="$(sed -n 'H;x;s/\/.*'"${line}"'.*//p' "nmap/Basic_${HOST}.nmap")"
+
                                 # case returns 0 by default (no match), so ! case returns 1
                                 if ! case "${cms}" in Joomla|WordPress|Drupal) false;; esac; then
                                         printf "${NC}\n"
