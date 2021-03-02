@@ -376,7 +376,9 @@ recon() {
                         while [ ${count} -lt ${secs} ]; do
                                 tlimit=$((secs - count))
                                 printf "\rRunning Default in (${tlimit}) s: \c\n"
-                                read -t 1 reconCommand
+
+                                # Waits 1 second for user's input - POSIX read -t
+                                reconCommand="$(sh -c '{ { sleep 1; kill -sINT $$; } & }; exec head -n 1')"
                                 count=$((count + 1))
                                 [ -n "${reconCommand}" ] && break
                         done
