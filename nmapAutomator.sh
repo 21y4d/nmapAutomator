@@ -170,7 +170,7 @@ progressBar() {
         fill="$(printf "%-$((width == 100 ? $2 : ($2 / 2)))s" "#" | tr ' ' '#')"
         empty="$(printf "%-$((width - (width == 100 ? $2 : ($2 / 2))))s" " ")"
         printf "In progress: $1 Scan ($3 elapsed - $4 remaining)   \n"
-        printf "[${fill}>${empty}] $2% done   \n"
+        printf "[${fill}>${empty}] $2%% done   \n"
         printf "\e[2A"
 }
 
