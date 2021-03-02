@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #by @21y4d
 
 RED='\033[0;31m'
