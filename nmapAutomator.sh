@@ -6,7 +6,7 @@ YELLOW='\033[0;33m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-SECONDS=0
+elapsedStart="$(date '+%H:%M:%S' | awk -F: '{print $1 * 3600 + $2 * 60 + $3}')"
 
 while [ $# -gt 0 ]; do
         key="$1"
@@ -592,17 +592,20 @@ footer() {
         printf "${GREEN}---------------------Finished all Nmap scans---------------------\n"
         printf "${NC}\n\n"
 
-        if [ ${SECONDS} -gt 3600 ]; then
-                hours=$((SECONDS / 3600))
-                minutes=$(((SECONDS % 3600) / 60))
-                seconds=$(((SECONDS % 3600) % 60))
+        elapsedEnd="$(date '+%H:%M:%S' | awk -F: '{print $1 * 3600 + $2 * 60 + $3}')"
+        elapsedSeconds=$((elapsedEnd - elapsedStart))
+
+        if [ ${elapsedSeconds} -gt 3600 ]; then
+                hours=$((elapsedSeconds / 3600))
+                minutes=$(((elapsedSeconds % 3600) / 60))
+                seconds=$(((elapsedSeconds % 3600) % 60))
                 printf "${YELLOW}Completed in ${hours} hour(s), ${minutes} minute(s) and ${seconds} second(s)\n"
-        elif [ ${SECONDS} -gt 60 ]; then
-                minutes=$(((SECONDS % 3600) / 60))
-                seconds=$(((SECONDS % 3600) % 60))
+        elif [ ${elapsedSeconds} -gt 60 ]; then
+                minutes=$(((elapsedSeconds % 3600) / 60))
+                seconds=$(((elapsedSeconds % 3600) % 60))
                 printf "${YELLOW}Completed in ${minutes} minute(s) and ${seconds} second(s)\n"
         else
-                printf "${YELLOW}Completed in ${SECONDS} seconds\n"
+                printf "${YELLOW}Completed in ${elapsedSeconds} seconds\n"
         fi
         printf "${NC}\n"
 }
