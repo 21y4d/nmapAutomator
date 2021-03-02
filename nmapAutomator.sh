@@ -375,7 +375,7 @@ recon() {
                         printf "Which commands would you like to run?${NC}\nAll (Default), ${availableRecon}Skip <!>\n\n"
                         while [ ${count} -lt ${secs} ]; do
                                 tlimit=$((secs - count))
-                                printf "\rRunning Default in (${tlimit}) s: \c\n"
+                                printf "\033[2K\rRunning Default in (${tlimit}) s: "
 
                                 # Waits 1 second for user's input - POSIX read -t
                                 reconCommand="$(sh -c '{ { sleep 1; kill -sINT $$; } & }; exec head -n 1')"
