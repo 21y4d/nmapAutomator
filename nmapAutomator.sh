@@ -605,7 +605,7 @@ footer() {
         else
                 printf "${YELLOW}Completed in ${SECONDS} seconds\n"
         fi
-        echo
+        printf "${NC}\n"
 }
 
 main() {
