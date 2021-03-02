@@ -411,7 +411,8 @@ reconRecommend() {
         printf "${NC}\n"
 
         oldIFS="${IFS}"
-        IFS=$'\n'
+        IFS="
+"
 
         if [ -f "nmap/Full_Extra_${HOST}.nmap" ]; then
                 ports="${allPorts}"
@@ -552,7 +553,8 @@ runRecon() {
         printf "${NC}\n"
 
         oldIFS="${IFS}"
-        IFS=$'\n'
+        IFS="
+"
 
         mkdir -p recon/
 
