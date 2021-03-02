@@ -218,7 +218,7 @@ basicScan() {
         if [ -z "${basicPorts}" ]; then
                 printf "${YELLOW}No ports in quick scan.. Skipping!\n"
         else
-                nmapProgressBar "${nmapType} -sCV -p${basicPorts} -oN nmap/Basic_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
+                nmapProgressBar "${nmapType} -sCV -p${basicPorts} --open -oN nmap/Basic_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
         fi
 
         if [ -f "nmap/Basic_${HOST}.nmap" ] && grep -q "Service Info: OS:" "nmap/Basic_${HOST}.nmap"; then
@@ -247,7 +247,7 @@ UDPScan() {
                 echo
         fi
 
-        nmapProgressBar "sudo ${nmapType} -sU --max-retries 1 --open -oN nmap/UDP_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
+        nmapProgressBar "sudo ${nmapType} -sU --max-retries 1 --open --open -oN nmap/UDP_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
         assignPorts "${HOST}"
 
         if [ -n "${udpPorts}" ]; then
@@ -256,9 +256,9 @@ UDPScan() {
                 printf "${YELLOW}Making a script scan on UDP ports: $(echo "${udpPorts}" | sed 's/,/, /g')\n"
                 printf "${NC}\n"
                 if [ -f /usr/share/nmap/scripts/vulners.nse ]; then
-                        nmapProgressBar "${nmapType} -sCVU --script vulners --script-args mincvss=7.0 -p${udpPorts} -oN nmap/UDP_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
+                        nmapProgressBar "${nmapType} -sCVU --script vulners --script-args mincvss=7.0 -p${udpPorts} --open -oN nmap/UDP_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                 else
-                        nmapProgressBar "${nmapType} -sCVU -p${udpPorts} -oN nmap/UDP_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
+                        nmapProgressBar "${nmapType} -sCVU -p${udpPorts} --open -oN nmap/UDP_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                 fi
         else
                 echo
@@ -276,7 +276,7 @@ fullScan() {
         printf "${GREEN}---------------------Starting Nmap Full Scan----------------------\n"
         printf "${NC}\n"
 
-        nmapProgressBar "${nmapType} -p- --max-retries 1 --max-rate 500 --max-scan-delay 20 -T4 -v -oN nmap/Full_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
+        nmapProgressBar "${nmapType} -p- --max-retries 1 --max-rate 500 --max-scan-delay 20 -T4 -v --open -oN nmap/Full_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
         assignPorts "${HOST}"
 
         if [ -z "${basicPorts}" ]; then
@@ -284,7 +284,7 @@ fullScan() {
                 echo
                 printf "${YELLOW}Making a script scan on all ports\n"
                 printf "${NC}\n"
-                nmapProgressBar "${nmapType} -sCV -p${allPorts} -oN nmap/Full_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
+                nmapProgressBar "${nmapType} -sCV -p${allPorts} --open -oN nmap/Full_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                 assignPorts "${HOST}"
         else
                 cmpPorts "${HOST}"
@@ -299,7 +299,7 @@ fullScan() {
                         echo
                         printf "${YELLOW}Making a script scan on extra ports: $(echo "${extraPorts}" | sed 's/,/, /g')\n"
                         printf "${NC}\n"
-                        nmapProgressBar "${nmapType} -sCV -p${extraPorts} -oN nmap/Full_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
+                        nmapProgressBar "${nmapType} -sCV -p${extraPorts} --open -oN nmap/Full_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                         assignPorts "${HOST}"
                 fi
         fi
@@ -330,7 +330,7 @@ vulnsScan() {
         else
                 printf "${YELLOW}Running CVE scan on ${portType} ports\n"
                 printf "${NC}\n"
-                nmapProgressBar "${nmapType} -sV --script vulners --script-args mincvss=7.0 -p${ports} -oN nmap/CVEs_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
+                nmapProgressBar "${nmapType} -sV --script vulners --script-args mincvss=7.0 -p${ports} --open -oN nmap/CVEs_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
                 echo
         fi
 
@@ -338,7 +338,7 @@ vulnsScan() {
         printf "${YELLOW}Running Vuln scan on ${portType} ports\n"
         printf "${YELLOW}This may take a while, depending on the number of detected services..\n"
         printf "${NC}\n"
-        nmapProgressBar "${nmapType} -sV --script vuln -p${ports} -oN nmap/Vulns_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
+        nmapProgressBar "${nmapType} -sV --script vuln -p${ports} --open -oN nmap/Vulns_${HOST}.nmap ${HOST} ${DNSSTRING}" 3
         echo
         echo
         echo
