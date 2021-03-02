@@ -192,7 +192,7 @@ nmapProgressBar() {
         done
         printf "\033[0K\r\n\033[0K\r\n"
         if [ -e "${outputFile}" ]; then
-                sed -n '/PORT.*STATE.*SERVICE/,/^$/p' "${outputFile}"
+                sed -n '/PORT.*STATE.*SERVICE/,/^# Nmap/H;${x;s/^\n\|\n[^\n]*\n# Nmap.*//gp}' "${outputFile}"
         else
                 cat "${tmpOutputFile}"
         fi
