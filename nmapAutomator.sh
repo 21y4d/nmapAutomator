@@ -345,6 +345,9 @@ vulnsScan() {
 }
 
 recon() {
+        oldIFS="${IFS}"
+        IFS="
+"
 
         reconRecommend "${HOST}" | tee "nmap/Recon_${HOST}.nmap"
         allRecon="$(grep "${HOST}" "nmap/Recon_${HOST}.nmap" | cut -d " " -f 1 | sort | uniq)"
@@ -404,6 +407,7 @@ recon() {
                 printf "${NC}\n\n\n"
         fi
 
+        IFS="${oldIFS}"
 }
 
 reconRecommend() {
