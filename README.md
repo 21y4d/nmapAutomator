@@ -85,8 +85,7 @@ The entire script output is also saved, which you can view with `less -r outputD
 
 ------
 
-## TODO list
-**Feel free to send your pull requests :)**
+## Upcoming Features
 - [x] Support URL/DNS - Thanks @KatsuragiCSL
 - [x] Add extensions fuzzing for http recon
 - [x] Add an nmap progress bar
@@ -101,6 +100,5 @@ The entire script output is also saved, which you can view with `less -r outputD
 - [ ] Add remote mode, which uses bash only without any external tools (for lateral movement in a network)
 
 
-## Add more recon options
-- If you would like to suggest or add more port-based recon options, you can base your pull request on the [following lines](https://github.com/21y4d/nmapAutomator/blob/17377bb42e0b2e99bd7d4b20efc878a0a0051025/nmapAutomator.sh#L422-L428).
-- If you would like to suggest more options for an existing port, you can add the new command under its port, similar to this [example line](https://github.com/21y4d/nmapAutomator/blob/17377bb42e0b2e99bd7d4b20efc878a0a0051025/nmapAutomator.sh#L447).
+**Feel free to send your pull requests :)**  
+*For any pull requests, please try to follow these [Coding Standards](https://github.com/21y4d/nmapAutomator/issues/46#issue-822933583).*
