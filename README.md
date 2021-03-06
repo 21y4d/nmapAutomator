@@ -13,9 +13,10 @@ This will ensure two things:
 2. Always have some recon running in the background. 
 
 Once initial ports are found '*in 5-10 seconds*', we can start manually looking into those ports, and let the rest run in the background with no interaction from our side whatsoever.  
-  
-  
-## Features:
+
+## Features
+
+### Scans
 1. **Quick:** Shows all open ports quickly (~15 seconds)  
 2. **Basic:** Runs Quick Scan, then runs a more thorough scan on found ports (~5 minutes)  
 3. **UDP:** Runs "Basic" on UDP ports (~5 minutes)  
@@ -24,7 +25,21 @@ Once initial ports are found '*in 5-10 seconds*', we can start manually looking 
 6. **Recon:** Runs "Basic" scan "if not yet run", then suggests recon commands "i.e. gobuster, nikto, smbmap" based on the found ports, then prompts to automatically run them  
 7. **All:** Runs all the scans consecutively (~20-30 minutes)  
 
-  -----
+*This is a reconnaissance tool, and it does not perform any exploitation.*
+
+### Automatic Recon
+With the `recon` option, nmapAutomator will automatically recommend and run the best recon tools for each found port.  
+If a recommended tool is missing from your machine, nmapAutomator will suggest how to install it.
+
+### Output
+nmapAutomator saves the output of each type of scan is saved into a separate file, under the output directory.  
+The entire script output is also saved, which you can view with `less -r outputDir/nmapAutomator_host_type.txt`, or you can simply `cat` it.
+
+### POSIX Compatible
+nmapAutomator is 100% POSIX compatible, so it can run on any `sh` shell, and on any `unix` machine.  
+You can use it on any device that supports shells (*even a 10 YO router!*), which makes nmapAutomator ideal for lateral movement recon.
+
+-----
   
 ## Requirements:
 [ffuf](https://github.com/ffuf/ffuf), which we can install with:
@@ -79,10 +94,6 @@ Scan Types:
 ./nmapAutomator.sh -H academy.htb -t Recon -d 1.1.1.1
 ```
 
-**Output**:  
-The output of each type of scan is saved into a separate file, under the output directory.  
-The entire script output is also saved, which you can view with `less -r outputDir/nmapAutomator_host_type.txt`, or you can simply `cat` it.
-
 ------
 
 ## Upcoming Features
@@ -93,7 +104,7 @@ The entire script output is also saved, which you can view with `less -r outputD
 - [x] Add option to change output folder
 - [x] Save full script output to a file
 - [x] Improve performance and efficiency of the script - Thanks @caribpa
-- [ ] Make nmapAutomater 100% POSIX compatible, so it can run on any `sh` shell, and on any `unix` machine. - Massive Thanks to @caribpa
+- [x] Make nmapAutomater 100% POSIX compatible. - Massive Thanks to @caribpa
 - [ ] Add network scanning type, so nmapAutomator can discover live hosts on the network.
 - [ ] Enable usage of multiple scan types in one scan.
 - [ ] Enable scanning of multiple hosts in one scan.
