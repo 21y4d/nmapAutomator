@@ -112,4 +112,4 @@ Scan Types:
 
 
 **Feel free to send your pull requests :)**  
-*For any pull requests, please try to follow these [Coding Standards](https://github.com/21y4d/nmapAutomator/issues/46#issue-822933583).*
+*For any pull requests, please try to follow these [Contribution Guidelines](CONTRIBUTING.md).*
