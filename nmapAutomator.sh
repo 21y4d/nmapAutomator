@@ -157,10 +157,6 @@ checkOS() {
 }
 
 cmpPorts() {
-        # To understand this magic, suppose $allPorts=22,80,445,8080 and $basicPorts=22,80
-        # This is how it looks like with the inner sub-shell and variables expanded:
-        # extraPorts="$(echo ,22,80,445,8080, | sed 's/,\(22,\|80,\)\+/,/g; s/^,\|,$//g')"
-        # The result of the expansion: extraPorts="445,8080"
         extraPorts="$(echo ",${allPorts}," | sed 's/,\('"$(echo "${basicPorts}" | sed 's/,/,\\|/g')"',\)\+/,/g; s/^,\|,$//g')"
 }
 
@@ -660,7 +656,6 @@ if ! expr "${HOST}" : '^\([0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\|\([[:alnum:]-]\{1,
         usage
 fi
 
-# case returns 0 by default (no match), so ! case returns 1; ! false -> true
 if ! case "${TYPE}" in [Qq]uick|[Bb]asic|UDP|udp|[Ff]ull|[Vv]ulns|[Rr]econ|[Aa]ll) false;; esac; then
         mkdir -p "${OUTPUTDIR}" && cd "${OUTPUTDIR}" && mkdir -p nmap/ || usage
         main | tee "nmapAutomator_${HOST}_${TYPE}.txt"
