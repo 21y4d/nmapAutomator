@@ -138,7 +138,7 @@ checkPing() {
                 echo "nmap -Pn"
         else
                 echo "nmap"
-                if expr "${HOST}" : '^[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$' > /dev/null; then
+                if expr "${HOST}" : '^[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$' >/dev/null; then
                         ttl="$(echo "${pingTest}" | cut -d " " -f 6 | cut -d "=" -f 2)"
                 else
                         ttl="$(echo "${pingTest}" | cut -d " " -f 7 | cut -d "=" -f 2)"
@@ -175,7 +175,7 @@ nmapProgressBar() {
         outputFile="$(echo $1 | sed -e 's/.*-oN \(.*\).nmap.*/\1/').nmap"
         tmpOutputFile="${outputFile}.tmp"
         if [ ! -e "${outputFile}" ]; then
-                $1 --stats-every "${refreshRate}s" > "${tmpOutputFile}" 2>&1 &
+                $1 --stats-every "${refreshRate}s" >"${tmpOutputFile}" 2>&1 &
         fi
 
         while { [ ! -e "${outputFile}" ] || ! grep -q "Nmap done at" "${outputFile}"; } && { [ ! -e "${tmpOutputFile}" ] || ! grep -i -q "quitting" "${tmpOutputFile}"; }; do
@@ -218,7 +218,7 @@ basicScan() {
         fi
 
         if [ -f "nmap/Basic_${HOST}.nmap" ] && grep -q "Service Info: OS:" "nmap/Basic_${HOST}.nmap"; then
-                    serviceOS="$(sed -n '/Service Info/{s/.* \([^;]*\);.*/\1/p;q}' "nmap/Basic_${HOST}.nmap")"
+                serviceOS="$(sed -n '/Service Info/{s/.* \([^;]*\);.*/\1/p;q}' "nmap/Basic_${HOST}.nmap")"
                 if [ "${osType}" != "${serviceOS}" ]; then
                         osType="${serviceOS}"
                         printf "${NC}\n"
@@ -252,9 +252,11 @@ UDPScan() {
                 printf "${YELLOW}Making a script scan on UDP ports: $(echo "${udpPorts}" | sed 's/,/, /g')\n"
                 printf "${NC}\n"
                 if [ -f /usr/share/nmap/scripts/vulners.nse ]; then
-                        nmapProgressBar "${nmapType} -sCVU --script vulners --script-args mincvss=7.0 -p${udpPorts} --open -oN nmap/UDP_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
+                        sudo -v
+                        nmapProgressBar "sudo ${nmapType} -sCVU --script vulners --script-args mincvss=7.0 -p${udpPorts} --open -oN nmap/UDP_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                 else
-                        nmapProgressBar "${nmapType} -sCVU -p${udpPorts} --open -oN nmap/UDP_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
+                        sudo -v
+                        nmapProgressBar "sudo ${nmapType} -sCVU -p${udpPorts} --open -oN nmap/UDP_Extra_${HOST}.nmap ${HOST} ${DNSSTRING}" 2
                 fi
         else
                 echo
@@ -350,19 +352,19 @@ recon() {
 
         for tool in ${allRecon}; do
                 if ! type "${tool}" 2>/dev/null | grep -q bin; then
-                        missingTools="${missingTools} ${tool}"
+                        missingTools="$(echo ${missingTools} ${tool} | awk '{$1=$1};1')"
                 fi
         done
 
         if [ -n "${missingTools}" ]; then
-                printf "${RED}Missing tools:${NC}${missingTools}\n"
+                printf "${RED}Missing tools: ${NC}${missingTools}\n"
                 printf "\n${RED}You can install with:\n"
-                printf "${YELLOW}sudo apt install${missingTools} -y\n"
+                printf "${YELLOW}sudo apt install ${missingTools} -y\n"
                 printf "${NC}\n\n"
 
-                availableRecon="$(echo "${allRecon}" | awk -vORS=', ' '!/'"$(echo "${missingTools}" | tr " " "|")"'/' | sed 's/..$//')"
+                availableRecon="$(echo "${allRecon}" | tr " " "\n" | awk -vORS=', ' '!/'"$(echo "${missingTools}" | tr " " "|")"'/' | sed 's/..$//')"
         else
-                availableRecon="$(echo "${allRecon}" | tr "\n" " " | sed 's/\ /,\ /g')"
+                availableRecon="$(echo "${allRecon}" | tr "\n" " " | sed 's/\ /,\ /g' | head -c-2)"
         fi
 
         secs=30
@@ -371,7 +373,7 @@ recon() {
         if [ -n "${availableRecon}" ]; then
                 while [ "${reconCommand}" != "!" ]; do
                         printf "${YELLOW}\n"
-                        printf "Which commands would you like to run?${NC}\nAll (Default), ${availableRecon}Skip <!>\n\n"
+                        printf "Which commands would you like to run?${NC}\nAll (Default), ${availableRecon}, Skip <!>\n\n"
                         while [ ${count} -lt ${secs} ]; do
                                 tlimit=$((secs - count))
                                 printf "\033[2K\rRunning Default in (${tlimit}) s: "
@@ -384,7 +386,7 @@ recon() {
                         if [ "${reconCommand}" = "All" ] || [ -z "${reconCommand}" ]; then
                                 runRecon "${HOST}" "All"
                                 reconCommand="!"
-                        elif expr " ${availableRecon}," : ".* ${reconCommand}," > /dev/null; then
+                        elif expr " ${availableRecon}," : ".* ${reconCommand}," >/dev/null; then
                                 runRecon "${HOST}" "${reconCommand}"
                                 reconCommand="!"
                         elif [ "${reconCommand}" = "Skip" ] || [ "${reconCommand}" = "!" ]; then
@@ -458,7 +460,7 @@ reconRecommend() {
                                 port="$(sed -n 'H;x;s/\/.*'"${line}"'.*//p' "nmap/Basic_${HOST}.nmap")"
 
                                 # case returns 0 by default (no match), so ! case returns 1
-                                if ! case "${cms}" in Joomla|WordPress|Drupal) false;; esac; then
+                                if ! case "${cms}" in Joomla | WordPress | Drupal) false ;; esac then
                                         printf "${NC}\n"
                                         printf "${YELLOW}CMS Recon:\n"
                                         printf "${NC}\n"
@@ -649,14 +651,14 @@ if [ -z "${TYPE}" ] || [ -z "${HOST}" ]; then
         usage
 fi
 
-if ! expr "${HOST}" : '^\([0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\|\([[:alnum:]-]\{1,63\}\.\)\+[[:alpha:]]\{2,6\}\)$' > /dev/null; then
+if ! expr "${HOST}" : '^\([0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\|\([[:alnum:]-]\{1,63\}\.\)\+[[:alpha:]]\{2,6\}\)$' >/dev/null; then
         printf "${RED}\n"
         printf "${RED}Invalid IP or URL!\n"
         printf "${RED}\n"
         usage
 fi
 
-if ! case "${TYPE}" in [Qq]uick|[Bb]asic|UDP|udp|[Ff]ull|[Vv]ulns|[Rr]econ|[Aa]ll) false;; esac; then
+if ! case "${TYPE}" in [Qq]uick | [Bb]asic | UDP | udp | [Ff]ull | [Vv]ulns | [Rr]econ | [Aa]ll) false ;; esac then
         mkdir -p "${OUTPUTDIR}" && cd "${OUTPUTDIR}" && mkdir -p nmap/ || usage
         main | tee "nmapAutomator_${HOST}_${TYPE}.txt"
 else
