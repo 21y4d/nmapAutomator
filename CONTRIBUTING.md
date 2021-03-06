@@ -1,4 +1,4 @@
-# Contribution Guidelines
+# Contributing Guidelines
 
 ## Coding Standards
 
