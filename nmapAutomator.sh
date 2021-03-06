@@ -364,7 +364,7 @@ recon() {
 
                 availableRecon="$(echo "${allRecon}" | tr " " "\n" | awk -vORS=', ' '!/'"$(echo "${missingTools}" | tr " " "|")"'/' | sed 's/..$//')"
         else
-                availableRecon="$(echo "${allRecon}" | tr "\n" " " | sed 's/\ /,\ /g' | head -c-2)"
+                availableRecon="$(echo "${allRecon}" | tr "\n" " " | sed 's/\ /,\ /g' | sed 's/..$//')"
         fi
 
         secs=30
