@@ -112,4 +112,4 @@ Scan Types:
 
 
 **Feel free to send your pull requests :)**  
-*For any pull requests, please try to follow these [Contribution Guidelines](CONTRIBUTING.md).*
+*For any pull requests, please try to follow these [Contributing Guidelines](CONTRIBUTING.md).*
