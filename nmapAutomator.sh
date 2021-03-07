@@ -32,6 +32,11 @@ while [ $# -gt 0 ]; do
                 shift
                 shift
                 ;;
+        -s | --static-nmap)
+                NMAPPATH="$2"
+                shift
+                shift
+                ;;
         --default)
                 DEFAULT=YES
                 shift
@@ -54,18 +59,31 @@ fi
 
 if [ -n "${DNS}" ]; then
         DNSSERVER="${DNS}"
+        DNSSTRING="--dns-server=${DNSSERVER}"
 else
-        DNSSERVER="1.1.1.1"
+        DNSSTRING="--system-dns"
 fi
-DNSSTRING="--dns-server=${DNSSERVER}"
 
 if [ -z "${OUTPUTDIR}" ]; then
         OUTPUTDIR="${HOST}"
 fi
 
+if [ -z "${NMAPPATH}" ]; then
+        NMAPPATH="$(type nmap | awk {'print $3'})"
+else
+        NMAPPATH="$(cd "$(dirname ${NMAPPATH})" && pwd -P)/$(basename ${NMAPPATH})"
+        if [ ! -x $NMAPPATH ]; then
+                printf "${RED}\nFile is not executable! Attempting chmod +x...${NC}\n"
+                chmod +x $NMAPPATH 2>/dev/null || { printf "${RED}Could not chmod. Please make it executable${NC}\n\n" && exit 1; }
+        elif [ $($NMAPPATH -h | head -c4) != "Nmap" ]; then
+                printf "${RED}\nStatic executable does not appear to be Nmap!${NC}\n" && exit 1
+        fi
+        printf "${GREEN}\nUsing static nmap executable at ${NMAPPATH}${NC}\n"
+fi
+
 usage() {
         echo
-        printf "${RED}Usage: $0 -H/--host <TARGET-IP> -t/--type <TYPE> [-d/--dns <DNS SERVER> -o/--output <OUTPUT DIRECTORY>]\n"
+        printf "${RED}Usage: $0 -H/--host <TARGET-IP> -t/--type <TYPE> [-d/--dns <DNS SERVER> -o/--output <OUTPUT DIRECTORY> -s/--static-nmap <STATIC NMAP PATH>]\n"
         printf "${YELLOW}\n"
         printf "Scan Types:\n"
         printf "\tNetwork: Shows all live hosts in the host's network (~15 seconds)\n"
@@ -138,9 +156,9 @@ assignPorts() {
 checkPing() {
         pingTest="$(ping -c 1 -W 3 "${HOST}" | grep ttl)"
         if [ -z "${pingTest}" ] && ! expr "${TYPE}" : '^[Nn]etwork$' >/dev/null; then
-                echo "nmap -Pn"
+                echo "${NMAPPATH} -Pn"
         else
-                echo "nmap"
+                echo "${NMAPPATH}"
                 if expr "${HOST}" : '^[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$' >/dev/null; then
                         ttl="$(echo "${pingTest}" | cut -d " " -f 6 | cut -d "=" -f 2)"
                 else
@@ -215,7 +233,7 @@ quickScan() {
         printf "${GREEN}---------------------Starting Nmap Quick Scan---------------------\n"
         printf "${NC}\n"
 
-        nmapProgressBar "${nmapType} -T4 --max-retries 1 --max-scan-delay 20 --defeat-rst-ratelimit --open -oN nmap/Quick_${HOST}.nmap ${HOST} ${DNSSTRING}"
+        nmapProgressBar "${nmapType} -T4 --max-retries 1 --max-scan-delay 20 --open -oN nmap/Quick_${HOST}.nmap ${HOST} ${DNSSTRING}"
         assignPorts "${HOST}"
 
         echo

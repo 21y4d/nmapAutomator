@@ -32,13 +32,14 @@ Once initial ports are found '*in 5-10 seconds*', we can start manually looking 
 With the `recon` option, nmapAutomator will automatically recommend and run the best recon tools for each found port.  
 If a recommended tool is missing from your machine, nmapAutomator will suggest how to install it.
 
+### Runs on any shell
+nmapAutomator is 100% POSIX compatible, so it can run on any `sh` shell, and on any unix-based machine (*even a 10 YO router!*), which makes nmapAutomator ideal for lateral movement recon.
+
+If you want to run nmapAutomator on a remote machine, simply download a static nmap executable from [this link](https://github.com/andrew-d/static-binaries/raw/master/binaries/linux/x86_64/nmap), or with [static-get](https://github.com/minos-org/minos-static), and transfer it to the remote machine. You can then use `-s/--static-nmap` to specify the path to the static nmap executable.
+
 ### Output
 nmapAutomator saves the output of each type of scan is saved into a separate file, under the output directory.  
 The entire script output is also saved, which you can view with `less -r outputDir/nmapAutomator_host_type.txt`, or you can simply `cat` it.
-
-### POSIX Compatible
-nmapAutomator is 100% POSIX compatible, so it can run on any `sh` shell, and on any `unix` machine.  
-You can use it on any device that supports shells (*even a 10 YO router!*), which makes nmapAutomator ideal for lateral movement recon.
 
 -----
   
@@ -76,9 +77,10 @@ sudo ln -s $(pwd)/nmapAutomator/nmapAutomator.sh /usr/local/bin/
 ## Usage:
 ```
 ./nmapAutomator.sh -h
-Usage: ./nmapAutomator.sh -H/--host <TARGET-IP> -t/--type <TYPE> [-d/--dns <DNS SERVER> -o/--output <OUTPUT DIRECTORY>]
+Usage: /usr/local/bin/nmapAutomator.sh -H/--host <TARGET-IP> -t/--type <TYPE> [-d/--dns <DNS SERVER> -o/--output <OUTPUT DIRECTORY> -s/--static-nmap <STATIC NMAP PATH>]
 
 Scan Types:
+	Network: Shows all live hosts in the host's network (~15 seconds)
 	Quick: Shows all open ports quickly (~15 seconds)
 	Basic: Runs Quick Scan, then runs a more thorough scan on found ports (~5 minutes)
 	UDP  : Runs "Basic" on UDP ports "requires sudo" (~5 minutes)
@@ -93,6 +95,7 @@ Scan Types:
 ./nmapAutomator.sh --host 10.1.1.1 --type All
 ./nmapAutomator.sh -H 10.1.1.1 -t Basic
 ./nmapAutomator.sh -H academy.htb -t Recon -d 1.1.1.1
+./nmapAutomator.sh -H 10.10.10.10 -t network -s ./nmap
 ```
 
 ------
