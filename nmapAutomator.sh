@@ -68,6 +68,7 @@ usage() {
         printf "${RED}Usage: $0 -H/--host <TARGET-IP> -t/--type <TYPE> [-d/--dns <DNS SERVER> -o/--output <OUTPUT DIRECTORY>]\n"
         printf "${YELLOW}\n"
         printf "Scan Types:\n"
+        printf "\tNetwork: Shows all live hosts in the host's network (~15 seconds)\n"
         printf "\tQuick: Shows all open ports quickly (~15 seconds)\n"
         printf "\tBasic: Runs Quick Scan, then runs a more thorough scan on found ports (~5 minutes)\n"
         printf "\tUDP  : Runs \"Basic\" on UDP ports \"requires sudo\" (~5 minutes)\n"
@@ -82,13 +83,15 @@ usage() {
 header() {
         echo
 
-        if [ "${TYPE}" = "All" ]; then
+        if expr "${TYPE}" : '^[Aa]ll$' >/dev/null; then
                 printf "${YELLOW}Running all scans on ${HOST}\n"
         else
                 printf "${YELLOW}Running a ${TYPE} scan on ${HOST}\n"
         fi
 
-        subnet="$(echo "${HOST}" | cut -d "." -f 1,2,3).0"
+        if expr "${HOST}" : '^[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$' >/dev/null; then
+                subnet="$(echo "${HOST}" | cut -d "." -f 1,2,3).0/24"
+        fi
 
         checkPing="$(checkPing "${HOST}")"
         nmapType="$(echo "${checkPing}" | head -n 1)"
@@ -134,7 +137,7 @@ assignPorts() {
 
 checkPing() {
         pingTest="$(ping -c 1 -W 3 "${HOST}" | grep ttl)"
-        if [ -z "${pingTest}" ]; then
+        if [ -z "${pingTest}" ] && ! expr "${TYPE}" : '^[Nn]etwork$' >/dev/null; then
                 echo "nmap -Pn"
         else
                 echo "nmap"
@@ -179,10 +182,10 @@ nmapProgressBar() {
         fi
 
         while { [ ! -e "${outputFile}" ] || ! grep -q "Nmap done at" "${outputFile}"; } && { [ ! -e "${tmpOutputFile}" ] || ! grep -i -q "quitting" "${tmpOutputFile}"; }; do
-                scanType="$(tail -n 2 "${tmpOutputFile}" | sed -ne '/elapsed/{s/.*undergoing \(.*\) Scan.*/\1/p}')"
-                percent="$(tail -n 2 "${tmpOutputFile}" | sed -ne '/% done/{s/.*About \(.*\)\..*% done.*/\1/p}')"
-                elapsed="$(tail -n 2 "${tmpOutputFile}" | sed -ne '/elapsed/{s/Stats: \(.*\) elapsed.*/\1/p}')"
-                remaining="$(tail -n 2 "${tmpOutputFile}" | sed -ne '/remaining/{s/.* (\(.*\) remaining.*/\1/p}')"
+                scanType="$(tail -n 2 "${tmpOutputFile}" 2>/dev/null | sed -ne '/elapsed/{s/.*undergoing \(.*\) Scan.*/\1/p}')"
+                percent="$(tail -n 2 "${tmpOutputFile}" 2>/dev/null | sed -ne '/% done/{s/.*About \(.*\)\..*% done.*/\1/p}')"
+                elapsed="$(tail -n 2 "${tmpOutputFile}" 2>/dev/null | sed -ne '/elapsed/{s/Stats: \(.*\) elapsed.*/\1/p}')"
+                remaining="$(tail -n 2 "${tmpOutputFile}" 2>/dev/null | sed -ne '/remaining/{s/.* (\(.*\) remaining.*/\1/p}')"
                 progressBar "${scanType:-No}" "${percent:-0}" "${elapsed:-0:00:00}" "${remaining:-0:00:00}"
                 sleep "${refreshRate}"
         done
@@ -193,6 +196,19 @@ nmapProgressBar() {
                 cat "${tmpOutputFile}"
         fi
         rm -f "${tmpOutputFile}"
+}
+
+networkScan() {
+        printf "${GREEN}---------------------Starting Nmap Network Scan---------------------\n"
+        printf "${NC}\n"
+
+        nmapProgressBar "${nmapType} -T4 --max-retries 1 --max-scan-delay 20 -n -sn -oN nmap/Network_${HOST}.nmap ${subnet}"
+        printf "${YELLOW}Found the following live hosts:${NC}\n\n"
+        cat nmap/Network_${HOST}.nmap | grep -v '#' | grep $(echo "${HOST}" | cut -d "." -f 1,2,3) | awk {'print $5'}
+
+        echo
+        echo
+        echo
 }
 
 quickScan() {
@@ -516,7 +532,7 @@ reconRecommend() {
                 printf "${YELLOW}DNS Recon:\n"
                 printf "${NC}\n"
                 echo "host -l \"${HOST}\" \"${DNSSERVER}\" | tee \"recon/hostname_${HOST}.txt\""
-                echo "dnsrecon -r \"${subnet}/24\" -n \"${DNSSERVER}\" | tee \"recon/dnsrecon_${HOST}.txt\""
+                echo "dnsrecon -r \"${subnet}\" -n \"${DNSSERVER}\" | tee \"recon/dnsrecon_${HOST}.txt\""
                 echo "dnsrecon -r 127.0.0.0/24 -n \"${DNSSERVER}\" | tee \"recon/dnsrecon-local_${HOST}.txt\""
                 echo "dig -x \"${HOST}\" @${DNSSERVER} | tee \"recon/dig_${HOST}.txt\""
                 echo
@@ -618,6 +634,9 @@ main() {
         header "${HOST}" "${TYPE}"
 
         case "${TYPE}" in
+        Network | network)
+                if [ -n ${subnet} ]; then networkScan "${HOST}"; else echo "Network scan requires an IP" && usage; fi
+                ;;
         Quick | quick) quickScan "${HOST}" ;;
         Basic | basic)
                 [ ! -f "nmap/Quick_${HOST}.nmap" ] && quickScan "${HOST}"
@@ -658,7 +677,7 @@ if ! expr "${HOST}" : '^\([0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\|\([[:alnum:]-]\{1,
         usage
 fi
 
-if ! case "${TYPE}" in [Qq]uick | [Bb]asic | UDP | udp | [Ff]ull | [Vv]ulns | [Rr]econ | [Aa]ll) false ;; esac then
+if ! case "${TYPE}" in [Nn]etwork | [Qq]uick | [Bb]asic | UDP | udp | [Ff]ull | [Vv]ulns | [Rr]econ | [Aa]ll) false ;; esac then
         mkdir -p "${OUTPUTDIR}" && cd "${OUTPUTDIR}" && mkdir -p nmap/ || usage
         main | tee "nmapAutomator_${HOST}_${TYPE}.txt"
 else

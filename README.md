@@ -17,15 +17,16 @@ Once initial ports are found '*in 5-10 seconds*', we can start manually looking 
 ## Features
 
 ### Scans
-1. **Quick:** Shows all open ports quickly (~15 seconds)  
-2. **Basic:** Runs Quick Scan, then runs a more thorough scan on found ports (~5 minutes)  
-3. **UDP:** Runs "Basic" on UDP ports (~5 minutes)  
-4. **Full:** Runs a full range port scan, then runs a thorough scan on new ports (~5-10 minutes)  
-5. **Vulns:** Runs CVE scan and nmap Vulns scan on all found ports (~5-15 minutes)  
-6. **Recon:** Runs "Basic" scan "if not yet run", then suggests recon commands "i.e. gobuster, nikto, smbmap" based on the found ports, then prompts to automatically run them  
-7. **All:** Runs all the scans consecutively (~20-30 minutes)  
+1. **Network:** Shows all live hosts in the host's network (~15 seconds)
+2. **Quick:** Shows all open ports quickly (~15 seconds)  
+3. **Basic:** Runs Quick Scan, then runs a more thorough scan on found ports (~5 minutes)  
+4. **UDP:** Runs "Basic" on UDP ports (~5 minutes)  
+5. **Full:** Runs a full range port scan, then runs a thorough scan on new ports (~5-10 minutes)  
+6. **Vulns:** Runs CVE scan and nmap Vulns scan on all found ports (~5-15 minutes)  
+7. **Recon:** Runs popular recon tools on found ports
+8. **All:** Runs all the scans sequentially (~20-30 minutes)  
 
-*This is a reconnaissance tool, and it does not perform any exploitation.*
+*Note: This is a reconnaissance tool, and it does not perform any exploitation.*
 
 ### Automatic Recon
 With the `recon` option, nmapAutomator will automatically recommend and run the best recon tools for each found port.  
