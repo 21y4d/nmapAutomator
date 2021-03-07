@@ -109,10 +109,10 @@ Scan Types:
 - [x] Save full script output to a file
 - [x] Improve performance and efficiency of the script - Thanks @caribpa
 - [x] Make nmapAutomater 100% POSIX compatible. - Massive Thanks to @caribpa
-- [ ] Add network scanning type, so nmapAutomator can discover live hosts on the network.
+- [x] Add network scanning type, so nmapAutomator can discover live hosts on the network.
 - [ ] Enable usage of multiple scan types in one scan.
 - [ ] Enable scanning of multiple hosts in one scan.
-- [ ] Add remote mode, which uses bash only without any external tools (for lateral movement in a network)
+- [ ] Add remote mode, which uses POSIX commands only without nmap or any external tools.
 
 
 **Feel free to send your pull requests :)**  
