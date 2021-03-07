@@ -52,7 +52,7 @@ while [ $# -gt 0 ]; do
 done
 set -- ${POSITIONAL}
 
-# Legacy support for running nmapAutomator without -H/-t
+# Set legacy flags, for running nmapAutomator without -H/-t
 if [ -z "${HOST}" ]; then
         HOST="$1"
 fi
@@ -75,9 +75,9 @@ if [ -z "${OUTPUTDIR}" ]; then
 fi
 
 # Set path to nmap binary or default to nmap in $PATH
-if [ -z "${NMAPPATH}" ]; then
-        NMAPPATH="$(type nmap | awk {'print $3'})"
-else
+if [ -z "${NMAPPATH}" ] && type nmap >/dev/null 2>&1; then
+        NMAPPATH="$(type nmap | awk {'print $NF'})"
+elif [ -n "${NMAPPATH}" ]; then
         NMAPPATH="$(cd "$(dirname ${NMAPPATH})" && pwd -P)/$(basename ${NMAPPATH})"
         # Ensure static binary is executable and is nmap
         if [ ! -x $NMAPPATH ]; then
@@ -87,41 +87,43 @@ else
                 printf "${RED}\nStatic binary does not appear to be Nmap!${NC}\n" && exit 1
         fi
         printf "${GREEN}\nUsing static nmap binary at ${NMAPPATH}${NC}\n"
+else
+        printf "${RED}\nNmap is not installed. Please provide a static binary with -s${NC}\n\n" && exit 1
 fi
 
 # Print usage menu and exit. Used when issues are encountered
 # No args needed
 usage() {
         echo
-        printf "${RED}Usage: $0 -H/--host <TARGET-IP> -t/--type <TYPE> [-d/--dns <DNS SERVER> -o/--output <OUTPUT DIRECTORY> -s/--static-nmap <STATIC NMAP PATH>]\n"
-        printf "${YELLOW}\n"
+        printf "${RED}Usage: $(basename $0) -H/--host ${NC}<TARGET-IP>${RED} -t/--type ${NC}<TYPE>${RED}\n"
+        printf "${YELLOW}Optional: [-d/--dns ${NC}<DNS SERVER>${YELLOW}] [-o/--output ${NC}<OUTPUT DIRECTORY>${YELLOW}] [-s/--static-nmap ${NC}<STATIC NMAP PATH>${YELLOW}]\n\n"
         printf "Scan Types:\n"
-        printf "\tNetwork: Shows all live hosts in the host's network (~15 seconds)\n"
-        printf "\tQuick: Shows all open ports quickly (~15 seconds)\n"
-        printf "\tBasic: Runs Quick Scan, then runs a more thorough scan on found ports (~5 minutes)\n"
-        printf "\tUDP  : Runs \"Basic\" on UDP ports \"requires sudo\" (~5 minutes)\n"
-        printf "\tFull : Runs a full range port scan, then runs a thorough scan on new ports (~5-10 minutes)\n"
-        printf "\tVulns: Runs CVE scan and nmap Vulns scan on all found ports (~5-15 minutes)\n"
-        printf "\tRecon: Suggests recon commands, then prompts to automatically run them\n"
-        printf "\tAll  : Runs all the scans (~20-30 minutes)\n"
+        printf "${YELLOW}\tNetwork : ${NC}Shows all live hosts in the host's network ${YELLOW}(~15 seconds)\n"
+        printf "${YELLOW}\tQuick   : ${NC}Shows all open ports quickly ${YELLOW}(~15 seconds)\n"
+        printf "${YELLOW}\tBasic   : ${NC}Runs Quick Scan, then runs a more thorough scan on found ports ${YELLOW}(~5 minutes)\n"
+        printf "${YELLOW}\tUDP     : ${NC}Runs \"Basic\" on UDP ports \"requires sudo\" ${YELLOW}(~5 minutes)\n"
+        printf "${YELLOW}\tFull    : ${NC}Runs a full range port scan, then runs a thorough scan on new ports ${YELLOW}(~5-10 minutes)\n"
+        printf "${YELLOW}\tVulns   : ${NC}Runs CVE scan and nmap Vulns scan on all found ports ${YELLOW}(~5-15 minutes)\n"
+        printf "${YELLOW}\tRecon   : ${NC}Suggests recon commands, then prompts to automatically run them\n"
+        printf "${YELLOW}\tAll     : ${NC}Runs all the scans ${YELLOW}(~20-30 minutes)\n"
         printf "${NC}\n"
         exit 1
 }
 
-# Print initial header before scans start
+# Print initial header and set initial variables before scans start
 # No args needed
 header() {
         echo
 
         # Print scan type
-        if expr "${TYPE}" : '^[Aa]ll$' >/dev/null; then
+        if expr "${TYPE}" : '^\([Aa]ll\)$' >/dev/null; then
                 printf "${YELLOW}Running all scans on ${NC}${HOST}\n"
         else
                 printf "${YELLOW}Running a ${TYPE} scan on ${NC}${HOST}\n"
         fi
 
         # Set $subnet variable
-        if expr "${HOST}" : '^[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$' >/dev/null; then
+        if expr "${HOST}" : '^\([0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\)$' >/dev/null; then
                 subnet="$(echo "${HOST}" | cut -d "." -f 1,2,3).0/24"
         fi
 
@@ -141,7 +143,6 @@ header() {
                 osType="$(checkOS "${ttl}")"
                 printf "${NC}\n"
                 printf "${GREEN}Host is likely running ${osType}\n"
-                printf "${NC}\n"
         fi
 
         echo
@@ -177,8 +178,9 @@ assignPorts() {
 # Test whether the host is pingable, and return $nmapType and $ttl
 # $1 is $HOST
 checkPing() {
-        pingTest="$(ping -c 1 -W 3 "$1" | grep ttl)"
-        if [ -z "${pingTest}" ] && ! expr "${TYPE}" : '^[Nn]etwork$' >/dev/null; then
+        # If ping is not returned within a second, then ping scan is disabled with -Pn
+        pingTest="$(ping -c 1 -W 1 "$1" | grep ttl)"
+        if [ -z "${pingTest}" ] && ! expr "${TYPE}" : '^\([Nn]etwork\)$' >/dev/null; then
                 echo "${NMAPPATH} -Pn"
         else
                 echo "${NMAPPATH}"
@@ -438,7 +440,7 @@ recon() {
 
         # Detect any missing tools
         for tool in ${allRecon}; do
-                if ! type "${tool}" 2>/dev/null | grep -q bin; then
+                if ! type "${tool}" >/dev/null 2>&1; then
                         missingTools="$(echo ${missingTools} ${tool} | awk '{$1=$1};1')"
                 fi
         done
@@ -465,14 +467,14 @@ recon() {
                         printf "Which commands would you like to run?${NC}\nAll (Default), ${availableRecon}, Skip <!>\n\n"
                         while [ ${count} -lt ${secs} ]; do
                                 tlimit=$((secs - count))
-                                printf "\033[2K\rRunning Default in (${tlimit}) s: "
+                                printf "\033[2K\rRunning Default in (${tlimit})s: "
 
                                 # Waits 1 second for user's input - POSIX read -t
                                 reconCommand="$(sh -c '{ { sleep 1; kill -sINT $$; } & }; exec head -n 1')"
                                 count=$((count + 1))
                                 [ -n "${reconCommand}" ] && break
                         done
-                        if [ "${reconCommand}" = "All" ] || [ -z "${reconCommand}" ]; then
+                        if expr "${reconCommand}" : '^\([Aa]ll\)$' >/dev/null || [ -z "${reconCommand}" ]; then
                                 runRecon "${HOST}" "All"
                                 reconCommand="!"
                         elif expr " ${availableRecon}," : ".* ${reconCommand}," >/dev/null; then
@@ -526,7 +528,7 @@ reconRecommend() {
         fi
 
         # DNS Recon
-        if echo "${file}" | grep -q "53/tcp"; then
+        if echo "${file}" | grep -q "53/tcp" && [ -n "${DNSSERVER}" ]; then
                 printf "${NC}\n"
                 printf "${YELLOW}DNS Recon:\n"
                 printf "${NC}\n"
@@ -555,7 +557,7 @@ reconRecommend() {
                                         urlType='http://'
                                         echo "nikto -host \"${urlType}${HOST}:${port}\" | tee \"recon/nikto_${HOST}_${port}.txt\""
                                 fi
-                                if type ffuf | grep -q bin; then
+                                if type ffuf >/dev/null 2>&1; then
                                         extensions="$(echo 'index' >./index && ffuf -s -w ./index:FUZZ -mc '200,302' -e '.asp,.aspx,.html,.jsp,.php' -u "${urlType}${HOST}:${port}/FUZZ" 2>/dev/null | awk -vORS=, -F 'index' '{print $2}' | sed 's/.$//' && rm ./index)"
                                         echo "ffuf -ic -w /usr/share/wordlists/dirb/common.txt -e '${extensions}' -u \"${urlType}${HOST}:${port}/FUZZ\" | tee \"recon/ffuf_${HOST}_${port}.txt\""
                                 else
@@ -722,7 +724,7 @@ main() {
 
         case "${TYPE}" in
         Network | network)
-                if [ -n ${subnet} ]; then networkScan "${HOST}"; else echo "Network scan requires an IP" && usage; fi
+                [ -n "${subnet}" ] && networkScan "${HOST}" || (printf "${RED}Network scan requires an IP\n" && usage)
                 ;;
         Quick | quick) quickScan "${HOST}" ;;
         Basic | basic)
@@ -753,25 +755,24 @@ main() {
         footer
 }
 
+# Ensure host and type are passed as arguments
 if [ -z "${TYPE}" ] || [ -z "${HOST}" ]; then
         usage
 fi
 
 # Ensure $HOST is an IP or a URL
-if ! expr "${HOST}" : '^\([0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\|\([[:alnum:]-]\{1,63\}\.\)\+[[:alpha:]]\{2,6\}\)$' >/dev/null; then
+if ! expr "${HOST}" : '^\([0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\)$' >/dev/null && ! expr "${HOST}" : '^\(\([[:alnum:]-]\{1,63\}\.\)*[[:alpha:]]\{2,6\}\)$' >/dev/null; then
         printf "${RED}\n"
         printf "${RED}Invalid IP or URL!\n"
-        printf "${RED}\n"
         usage
 fi
 
-# Ensure chosen type is among available choices
+# Ensure selected scan type is among available choices, then run the selected scan
 if ! case "${TYPE}" in [Nn]etwork | [Qq]uick | [Bb]asic | UDP | udp | [Ff]ull | [Vv]ulns | [Rr]econ | [Aa]ll) false ;; esac then
         mkdir -p "${OUTPUTDIR}" && cd "${OUTPUTDIR}" && mkdir -p nmap/ || usage
         main | tee "nmapAutomator_${HOST}_${TYPE}.txt"
 else
         printf "${RED}\n"
         printf "${RED}Invalid Type!\n"
-        printf "${RED}\n"
         usage
 fi
