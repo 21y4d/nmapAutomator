@@ -326,7 +326,7 @@ portScan() {
         printf "${NC}\n"
 
         if ! $REMOTE; then
-                nmapProgressBar "${nmapType} -T4 --max-retries 1 --max-scan-delay 20 --open -oN nmap/Port_${HOST}.nmap ${HOST} ${DNSSTRING}"
+                nmapProgressBar "${nmapType} -T4 --reason --max-retries 1 --max-scan-delay 20 --open -oN nmap/Port_${HOST}.nmap ${HOST} ${DNSSTRING}"
                 assignPorts "${HOST}"
         else
                 printf "${YELLOW}Port Scan is not implemented yet in Remote mode.\n${NC}"
