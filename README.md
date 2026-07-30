@@ -52,42 +52,77 @@ The entire script output is also saved, which you can view with `less -r outputD
 
 -----
   
-## Requirements:
-[ffuf](https://github.com/ffuf/ffuf), which we can install with:
+## Requirements & Dependency Installation
+
+`nmapAutomator` automatically detects missing tools and notifies you. Below are setup commands for **Kali Linux** and **macOS**.
+
+### 1. Kali Linux / Debian / Ubuntu
+
+Most recon tools come pre-installed in [Kali Linux](https://www.kali.org) and [Parrot OS](https://www.parrotsec.org). To install or update all required and optional recon tools:
+
 ```bash
-sudo apt update
-sudo apt install ffuf -y
+sudo apt update && sudo apt install -y \
+  nmap ffuf gobuster nikto sslscan joomscan \
+  wpscan smbmap enum4linux dnsrecon snmp ldap-utils
 ```
 
-Or [Gobuster](https://github.com/OJ/gobuster) '*v3.0 or higher*', which we can install with:  
+### 2. macOS (Homebrew)
+
+`nmapAutomator` fully supports macOS (with both native BSD `sed` or Homebrew `gnu-sed`). Install dependencies using [Homebrew](https://brew.sh):
+
 ```bash
-sudo apt update
-sudo apt install gobuster -y
+brew update && brew install \
+  nmap ffuf gobuster nikto sslscan wpscan gnu-sed
 ```
 
-Other recon tools used within the script include:
+### Other Recon Tools Supported:
 |[nmap Vulners](https://github.com/vulnersCom/nmap-vulners)|[sslscan](https://github.com/rbsec/sslscan)|[nikto](https://github.com/sullo/nikto)|[joomscan](https://github.com/rezasp/joomscan)|[wpscan](https://github.com/wpscanteam/wpscan)|
 |:-:|:-:|:-:|:-:|:-:|
 |[droopescan](https://github.com/droope/droopescan)|[smbmap](https://github.com/ShawnDEvans/smbmap)|[enum4linux](https://github.com/portcullislabs/enum4linux)|[dnsrecon](https://github.com/darkoperator/dnsrecon)|[odat](https://github.com/quentinhardy/odat)|
 |[smtp-user-enum](https://github.com/pentestmonkey/smtp-user-enum)|snmp-check|snmpwalk|ldapsearch||
 
-  
-Most of these should be installed by default in [Parrot OS](https://www.parrotsec.org) and [Kali Linux](https://www.kali.org).  
-*If any recon recommended tools are found to be missing, they will be automatically omitted, and the user will be notified.*
-  
-## Installation:
+*If any recommended recon tools are missing, they will be automatically omitted during scans and reported via `na -c`.*
+
+-----
+
+## Installation & Global Alias Setup
+
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/21y4d/nmapAutomator.git
-sudo ln -s $(pwd)/nmapAutomator/nmapAutomator.sh /usr/local/bin/
+cd nmapAutomator
+```
+
+### 2. Make it Globally Executable
+Create a symbolic link in `/usr/local/bin`:
+```bash
+sudo ln -s $(pwd)/nmapAutomator.sh /usr/local/bin/nmapAutomator
+```
+
+### 3. Add `na` Short Alias
+To run `nmapAutomator` using the short `na` command:
+
+**Option A: Create a direct symlink (`na`)** *(Recommended)*
+```bash
+sudo ln -s $(pwd)/nmapAutomator.sh /usr/local/bin/na
+```
+
+**Option B: Add a shell alias (`~/.bashrc` or `~/.zshrc`)**
+```bash
+# For Bash (Linux / macOS)
+echo "alias na='nmapAutomator.sh'" >> ~/.bashrc && source ~/.bashrc
+
+# For Zsh (macOS / Kali default)
+echo "alias na='nmapAutomator.sh'" >> ~/.zshrc && source ~/.zshrc
 ```
 
 -----
 
 ## Usage:
 ```
-./nmapAutomator.sh -h
+na -h
 Usage: nmapAutomator.sh -H/--host <TARGET-IP> -t/--type <TYPE>
-Optional: [-r/--remote <REMOTE MODE>] [-d/--dns <DNS SERVER>] [-o/--output <OUTPUT DIRECTORY>] [-s/--static-nmap <STATIC NMAP PATH>]
+Optional: [-r/--remote <REMOTE MODE>] [-d/--dns <DNS SERVER>] [-o/--output <OUTPUT DIRECTORY>] [-s/--static-nmap <STATIC NMAP PATH>] [-c/--check-deps] [-m/--min-rate <RATE>]
 
 Scan Types:
 	Network : Shows all live hosts in the host's network (~15 seconds)
@@ -100,12 +135,26 @@ Scan Types:
 	All     : Runs all the scans (~20-30 minutes)
 ```
 
-**Example scans**:
+**Check installed dependencies**:
+```bash
+na -c
+# or
+na --check-deps
 ```
-./nmapAutomator.sh --host 10.1.1.1 --type All
-./nmapAutomator.sh -H 10.1.1.1 -t Basic
-./nmapAutomator.sh -H academy.htb -t Recon -d 1.1.1.1
-./nmapAutomator.sh -H 10.10.10.10 -t network -s ./nmap
+
+**Example scans**:
+```bash
+# Fast Shorthand: Runs All scans with high speed (default 1000 pps)
+na 10.1.1.1
+
+# High Speed Scan (2500 pps for fast lab environments):
+na 10.1.1.1 -m 2500
+
+# Explicit scans:
+na --host 10.1.1.1 --type All
+na -H 10.1.1.1 -t Port
+na -H academy.htb -t Recon -d 1.1.1.1
+na -H 10.10.10.10 -t Network -s ./nmap
 ```
 
 ------
